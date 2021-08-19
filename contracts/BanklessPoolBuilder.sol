@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "@pooltogether/pooltogether-contracts/contracts/registry/RegistryInterface.sol";
 import "@pooltogether/pooltogether-contracts/contracts/builders/MultipleWinnersBuilder.sol";
 
-import "./../BanklessPrizePoolProxyFactory.sol";
+import "./BanklessPrizePoolProxyFactory.sol";
 
 contract BanklessPoolBuilder {
   using SafeCastUpgradeable for uint256;
@@ -74,5 +74,4 @@ contract BanklessPoolBuilder {
     tokens[1] = ControlledTokenInterface(address(_multipleWinners.sponsorship()));
     return tokens;
   }
-
 }
