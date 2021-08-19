@@ -12,16 +12,16 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@pooltogether/pooltogether-rng-contracts/contracts/RNGInterface.sol";
 import "@pooltogether/fixed-point/contracts/FixedPoint.sol";
 
-import "../token/TokenListener.sol";
-import "../token/TokenControllerInterface.sol";
-import "../token/ControlledToken.sol";
-import "../token/TicketInterface.sol";
-import "./PrizePool.sol";
-import "../Constants.sol";
-import "./../prize-strategy/PeriodicPrizeStrategyListenerInterface.sol";
-import "./../prize-strategy/PeriodicPrizeStrategyListenerLibrary.sol";
-import "./../prize-strategy/BeforeAwardListener.sol";
-import "../utils/MappedSinglyLinkedList.sol";
+import "@pooltogether/pooltogether-contracts/contracts/token/TicketInterface.sol";
+import "@pooltogether/pooltogether-contracts/contracts/token/TokenListener.sol";
+import "@pooltogether/pooltogether-contracts/contracts/token/TokenControllerInterface.sol";
+import "@pooltogether/pooltogether-contracts/contracts/Constants.sol";
+import "@pooltogether/pooltogether-contracts/contracts/prize-strategy/PeriodicPrizeStrategyListenerInterface.sol";
+import "@pooltogether/pooltogether-contracts/contracts/prize-strategy/PeriodicPrizeStrategyListenerLibrary.sol";
+import "@pooltogether/pooltogether-contracts/contracts/prize-strategy/BeforeAwardListener.sol";
+import "@pooltogether/pooltogether-contracts/contracts/utils/MappedSinglyLinkedList.sol";
+
+import "./../BanklessPrizePool.sol";
 
 /* solium-disable security/no-block-members */
 abstract contract PeriodicPrizeStrategy is Initializable,
@@ -119,7 +119,7 @@ abstract contract PeriodicPrizeStrategy is Initializable,
   TokenListenerInterface public tokenListener;
 
   // Contract Interfaces
-  PrizePool public prizePool;
+  BanklessPrizePool public prizePool;
   TicketInterface public ticket;
   IERC20Upgradeable public sponsorship;
   RNGInterface public rng;
@@ -158,7 +158,7 @@ abstract contract PeriodicPrizeStrategy is Initializable,
   function initialize (
     uint256 _prizePeriodStart,
     uint256 _prizePeriodSeconds,
-    PrizePool _prizePool,
+    BanklessPrizePool _prizePool,
     TicketInterface _ticket,
     IERC20Upgradeable _sponsorship,
     RNGInterface _rng

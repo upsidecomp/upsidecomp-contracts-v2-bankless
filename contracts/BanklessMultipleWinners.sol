@@ -3,8 +3,9 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-import "./../../prize-strategy/PrizeSplit.sol";
-import "../PeriodicPrizeStrategy.sol";
+import "@pooltogether/pooltogether-contracts/contracts/prize-strategy/PrizeSplit.sol";
+
+import "./prize-strategy/PeriodicPrizeStrategy.sol";
 
 contract BanklessMultipleWinners is PeriodicPrizeStrategy {
 
@@ -65,7 +66,7 @@ contract BanklessMultipleWinners is PeriodicPrizeStrategy {
   function initializeMultipleWinners (
     uint256 _prizePeriodStart,
     uint256 _prizePeriodSeconds,
-    PrizePool _prizePool,
+    BanklessPrizePool _prizePool,
     TicketInterface _ticket,
     IERC20Upgradeable _sponsorship,
     RNGInterface _rng,
