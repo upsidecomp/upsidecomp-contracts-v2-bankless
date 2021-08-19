@@ -112,13 +112,6 @@ module.exports = async (hardhat) => {
     dim("  - Bank:              ", bankResult.address)
   }
 
-  cyan(`\nDeploying TokenFaucetProxyFactory...`)
-  const tokenFaucetProxyFactoryResult = await deploy("TokenFaucetProxyFactory", {
-    from: deployer,
-    skipIfAlreadyDeployed: false
-  })
-  displayResult('TokenFaucetProxyFactory', tokenFaucetProxyFactoryResult)
-
   cyan(`\nDeploying ReserveRegistry...`)
   if (!reserveRegistry) {
     // if not set by named config
@@ -162,87 +155,121 @@ module.exports = async (hardhat) => {
     yellow(`Using existing reserve registry ${reserveRegistry}`)
   }
 
-  cyan("\nDeploying ControlledTokenProxyFactory...")
-  const controlledTokenProxyFactoryResult = await deploy("ControlledTokenProxyFactory", {
-    from: deployer,
-    skipIfAlreadyDeployed: false
-  })
-  displayResult('ControlledTokenProxyFactory', controlledTokenProxyFactoryResult)
 
-  cyan("\nDeploying TicketProxyFactory...")
-  const ticketProxyFactoryResult = await deploy("TicketProxyFactory", {
-    from: deployer,
-    skipIfAlreadyDeployed: false
-  })
-  displayResult('TicketProxyFactory', ticketProxyFactoryResult)
-
-  let stakePrizePoolProxyFactoryResult
-  if (isTestEnvironment && !harnessDisabled) {
-    cyan("\nDeploying StakePrizePoolHarnessProxyFactory...")
-    stakePrizePoolProxyFactoryResult = await deploy("StakePrizePoolProxyFactory", {
-      contract: 'StakePrizePoolHarnessProxyFactory',
+  const deployControlledTokenProxyFactory = async () => {
+    cyan("\nDeploying ControlledTokenProxyFactory...")
+    const controlledTokenProxyFactoryResult = await deploy("ControlledTokenProxyFactory", {
       from: deployer,
       skipIfAlreadyDeployed: false
     })
+    displayResult('ControlledTokenProxyFactory', controlledTokenProxyFactoryResult)
+    return controlledTokenProxyFactoryResult;
   }
-  else{
-    cyan("\nDeploying StakePrizePoolProxyFactory...")
-    stakePrizePoolProxyFactoryResult = await deploy("StakePrizePoolProxyFactory", {
+
+
+  const deployTicketProxyFactory = async () => {
+    cyan("\nDeploying TicketProxyFactory...")
+    const ticketProxyFactoryResult = await deploy("TicketProxyFactory", {
       from: deployer,
       skipIfAlreadyDeployed: false
     })
+    displayResult('TicketProxyFactory', ticketProxyFactoryResult)
+    return ticketProxyFactoryResult;
   }
-  displayResult('StakePrizePoolProxyFactory', stakePrizePoolProxyFactoryResult)
 
-  let multipleWinnersProxyFactoryResult
-  cyan("\nDeploying MultipleWinnersProxyFactory...")
-  if (isTestEnvironment && !harnessDisabled) {
-    multipleWinnersProxyFactoryResult = await deploy("MultipleWinnersProxyFactory", {
-      contract: 'MultipleWinnersHarnessProxyFactory',
-      from: deployer,
-      skipIfAlreadyDeployed: false
-    })
-  } else {
-    multipleWinnersProxyFactoryResult = await deploy("MultipleWinnersProxyFactory", {
-      from: deployer,
-      skipIfAlreadyDeployed: false
-    })
+  const deployBanklessPrizePoolHarnessProxyFactory = async () => {
+    let banklessPrizePoolProxyFactoryResult
+    if (isTestEnvironment && !harnessDisabled) {
+      cyan("\nDeploying BanklessPrizePoolHarnessProxyFactory...")
+      banklessPrizePoolProxyFactoryResult = await deploy("BanklessPrizePoolProxyFactory", {
+        contract: 'BanklessPrizePoolHarnessProxyFactory',
+        from: deployer,
+        skipIfAlreadyDeployed: false
+      })
+    }
+    else{
+      cyan("\nDeploying BanklessPrizePoolProxyFactory...")
+      banklessPrizePoolProxyFactoryResult = await deploy("BanklessPrizePoolProxyFactory", {
+        from: deployer,
+        skipIfAlreadyDeployed: false
+      })
+    }
+    displayResult('BanklessPrizePoolProxyFactory', banklessPrizePoolProxyFactoryResult)
+    return banklessPrizePoolProxyFactoryResult;
   }
-  displayResult('MultipleWinnersProxyFactory', multipleWinnersProxyFactoryResult)
 
-  cyan("\nDeploying ControlledTokenBuilder...")
-  const controlledTokenBuilderResult = await deploy("ControlledTokenBuilder", {
-    args: [
-      controlledTokenProxyFactoryResult.address,
-      ticketProxyFactoryResult.address
-    ],
-    from: deployer,
-    skipIfAlreadyDeployed: false
-  })
-  displayResult('ControlledTokenBuilder', controlledTokenBuilderResult)
+  const deployMultipleWinnersProxyFactory = async () => {
+    let multipleWinnersProxyFactoryResult
+    cyan("\nDeploying MultipleWinnersProxyFactory...")
+    if (isTestEnvironment && !harnessDisabled) {
+      multipleWinnersProxyFactoryResult = await deploy("MultipleWinnersProxyFactory", {
+        contract: 'MultipleWinnersHarnessProxyFactory',
+        from: deployer,
+        skipIfAlreadyDeployed: false
+      })
+    } else {
+      multipleWinnersProxyFactoryResult = await deploy("MultipleWinnersProxyFactory", {
+        from: deployer,
+        skipIfAlreadyDeployed: false
+      })
+    }
+    displayResult('MultipleWinnersProxyFactory', multipleWinnersProxyFactoryResult)
+    return multipleWinnersProxyFactoryResult;
+  }
 
-  cyan("\nDeploying MultipleWinnersBuilder...")
-  const multipleWinnersBuilderResult = await deploy("MultipleWinnersBuilder", {
-    args: [
-      multipleWinnersProxyFactoryResult.address,
-      controlledTokenBuilderResult.address,
-    ],
-    from: deployer,
-    skipIfAlreadyDeployed: false
-  })
-  displayResult('MultipleWinnersBuilder', multipleWinnersBuilderResult)
+  const deployControlledTokenBuilder = async () => {
+    cyan("\nDeploying ControlledTokenBuilder...")
+    const controlledTokenBuilderResult = await deploy("ControlledTokenBuilder", {
+      args: [
+        controlledTokenProxyFactoryResult.address,
+        ticketProxyFactoryResult.address
+      ],
+      from: deployer,
+      skipIfAlreadyDeployed: false
+    })
+    displayResult('ControlledTokenBuilder', controlledTokenBuilderResult)
+    return controlledTokenBuilderResult;
+  }
 
-  cyan("\nDeploying BanklessPoolBuilder...")
-  const banklessPoolBuilder = await deploy("BanklessPoolBuilder", {
-    args: [
-      reserveRegistry,
-      stakePrizePoolProxyFactoryResult.address,
-      multipleWinnersBuilderResult.address
-    ],
-    from: deployer,
-    skipIfAlreadyDeployed: false
-  })
-  displayResult('BanklessPoolBuilder', banklessPoolBuilder)
+  const deployMultipleWinnersBuilder = async () => {
+    cyan("\nDeploying MultipleWinnersBuilder...")
+    const multipleWinnersBuilderResult = await deploy("MultipleWinnersBuilder", {
+      args: [
+        multipleWinnersProxyFactoryResult.address,
+        controlledTokenBuilderResult.address,
+      ],
+      from: deployer,
+      skipIfAlreadyDeployed: false
+    })
+    displayResult('MultipleWinnersBuilder', multipleWinnersBuilderResult)
+    return multipleWinnersBuilderResult;
+  }
+
+  const deployBanklessPoolBuilder = async () => {
+    cyan("\nDeploying BanklessPoolBuilder...")
+    const banklessPoolBuilder = await deploy("BanklessPoolBuilder", {
+      args: [
+        reserveRegistry,
+        banklessPrizePoolProxyFactoryResult.address,
+        multipleWinnersBuilderResult.address
+      ],
+      from: deployer,
+      skipIfAlreadyDeployed: false
+    })
+    displayResult('BanklessPoolBuilder', banklessPoolBuilder)
+    return banklessPoolBuilder
+  }
+
+  // Proxies
+  const controlledTokenProxyFactoryResult = await deployControlledTokenProxyFactory();
+  const ticketProxyFactoryResult = await deployTicketProxyFactory();
+  const banklessPrizePoolProxyFactoryResult = await deployBanklessPrizePoolHarnessProxyFactory();
+  const multipleWinnersProxyFactoryResult = await deployMultipleWinnersProxyFactory();
+
+  // Non-Proxies
+  const controlledTokenBuilderResult = await deployControlledTokenBuilder();
+  const multipleWinnersBuilderResult = await deployMultipleWinnersBuilder();
+  const banklessPoolBuilder = await deployBanklessPoolBuilder();
 
   dim("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
   green("Contract Deployments Complete!")
