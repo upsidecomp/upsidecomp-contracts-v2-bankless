@@ -3,7 +3,7 @@ pragma solidity 0.6.12;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 
-contract ERC721Minter is ERC721Upgradeable {
+contract ERC721Mintable is ERC721Upgradeable {
     event Minted(address indexed owner, uint256 tokenId);
 
     constructor(string memory name, string memory symbol) public {
@@ -12,11 +12,13 @@ contract ERC721Minter is ERC721Upgradeable {
 
     uint256 private tokenId = 0;
 
-    function mint() public {
+    function mint() public returns (bool) {
         tokenId++;
 
         _safeMint(msg.sender, tokenId);
 
         emit Minted(msg.sender, tokenId);
+
+        return true;
     }
 }

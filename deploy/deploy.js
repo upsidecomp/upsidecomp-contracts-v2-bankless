@@ -106,6 +106,17 @@ module.exports = async (hardhat) => {
     })
     bankAddress = bankResult.address
 
+    // todo: remove
+    const daiResult = await deploy("Dai", {
+      args: [
+        'DAI Test Token',
+        'DAI'
+      ],
+      contract: 'ERC20Mintable',
+      from: deployer,
+      skipIfAlreadyDeployed: true
+    })
+
     // Display Contract Addresses
     dim("\nLocal Contract Deployments;\n")
     dim("  - RNGService:       ", rng)
@@ -198,7 +209,7 @@ module.exports = async (hardhat) => {
     return banklessPrizePoolProxyFactoryResult;
   }
 
-  const deployMultipleWinnersProxyFactory = async () => {
+  const deployBanklessMultipleWinnersProxyFactory = async () => {
     let multipleWinnersProxyFactoryResult
     cyan("\nDeploying MultipleWinnersProxyFactory...")
     if (isTestEnvironment && !harnessDisabled) {
@@ -231,9 +242,9 @@ module.exports = async (hardhat) => {
     return controlledTokenBuilderResult;
   }
 
-  const deployMultipleWinnersBuilder = async () => {
+  const deployBanklessMultipleWinnersBuilder = async () => {
     cyan("\nDeploying MultipleWinnersBuilder...")
-    const multipleWinnersBuilderResult = await deploy("MultipleWinnersBuilder", {
+    const multipleWinnersBuilderResult = await deploy("BanklessMultipleWinnersBuilder", {
       args: [
         multipleWinnersProxyFactoryResult.address,
         controlledTokenBuilderResult.address,
@@ -264,11 +275,11 @@ module.exports = async (hardhat) => {
   const controlledTokenProxyFactoryResult = await deployControlledTokenProxyFactory();
   const ticketProxyFactoryResult = await deployTicketProxyFactory();
   const banklessPrizePoolProxyFactoryResult = await deployBanklessPrizePoolHarnessProxyFactory();
-  const multipleWinnersProxyFactoryResult = await deployMultipleWinnersProxyFactory();
+  const multipleWinnersProxyFactoryResult = await deployBanklessMultipleWinnersProxyFactory();
 
   // Non-Proxies
   const controlledTokenBuilderResult = await deployControlledTokenBuilder();
-  const multipleWinnersBuilderResult = await deployMultipleWinnersBuilder();
+  const multipleWinnersBuilderResult = await deployBanklessMultipleWinnersBuilder();
   const banklessPoolBuilder = await deployBanklessPoolBuilder();
 
   dim("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")

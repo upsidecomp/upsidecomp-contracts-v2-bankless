@@ -13,7 +13,7 @@
     "start": "echo 'Starting node for local testing....\n'; rm -rf deployments/localhost_31337; DISABLE_HARNESS=true hardhat node",
     "start-gas": "echo 'Starting node for gas testing....\n'; rm -rf deployments/localhost_31337; DISABLE_HARNESS=true hardhat node",
     "deploy": "hardhat deploy --write true --network",
-    "mint": "hardhat run --network localhost scripts/mint.js"
+    "run:test-pool": "hardhat run ./js/deployTestPool.js --network"
   },
   "dependencies": {
     "@openzeppelin/contracts-upgradeable": "3.4.0",

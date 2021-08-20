@@ -39,7 +39,6 @@ async function main() {
   let reserveResult = await deployments.get('Reserve')
   let banklessPoolBuilder = await deployments.get("BanklessPoolBuilder")
 
-
   const reserve = await hardhat.ethers.getContractAt('Reserve', reserveResult.address, signer)
   const token = await hardhat.ethers.getContractAt('ERC20Mintable', tokenResult.address, signer)
   const poolBuilder = await hardhat.ethers.getContractAt('BanklessPoolBuilder', banklessPoolBuilder.address, signer)
@@ -47,7 +46,6 @@ async function main() {
   let linkToken = await ERC20Mintable.deploy('Link Token', 'LINK')
   let rngServiceMock = await hardhat.ethers.getContractAt('RNGServiceMock', rngServiceMockResult.address, signer)
   await rngServiceMock.setRequestFee(linkToken.address, toWei('1'))
-
 
   const multipleWinnersConfig = {
     proxyAdmin: AddressZero,
@@ -60,7 +58,7 @@ async function main() {
     sponsorshipSymbol: "SPON",
     ticketCreditLimitMantissa: params.creditLimit,
     ticketCreditRateMantissa: params.creditRate,
-    splitExternalErc20Awards: params.externalERC20Awards,
+    // splitExternalErc20Awards: params.externalERC20Awards,
     prizeSplits: [],
     numberOfWinners: 1
   }
@@ -70,7 +68,7 @@ async function main() {
     token: tokenResult.address,
     maxExitFeeMantissa: params.maxExitFeeMantissa
   }
-
+  // console.log(poolBuilder)
   let tx = await poolBuilder.createBanklessMultipleWinners(stakePoolConfig, multipleWinnersConfig, token.decimals())
   let events = await getEvents(poolBuilder, tx)
   let event = events[0]
@@ -95,7 +93,7 @@ async function main() {
     prizeStrategy: prizeStrategyAddress,
   })
 
-  const prizeStrategy = await hardhat.ethers.getContractAt('MultipleWinnersHarness', prizeStrategyAddress, signer)
+  const prizeStrategy = await hardhat.ethers.getContractAt('BanklessMultipleWinnersHarness', prizeStrategyAddress, signer)
 
   debug(`Done!`)
 
