@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 
 import "@pooltogether/pooltogether-contracts/contracts/prize-strategy/PrizeSplit.sol";
 
-import "./prize-strategy/PeriodicPrizeStrategy.sol";
+import "../PeriodicPrizeStrategy.sol";
 
 contract BanklessMultipleWinners is PeriodicPrizeStrategy {
 

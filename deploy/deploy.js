@@ -109,7 +109,7 @@ module.exports = async (hardhat) => {
     // Display Contract Addresses
     dim("\nLocal Contract Deployments;\n")
     dim("  - RNGService:       ", rng)
-    dim("  - Bank:              ", bankResult.address)
+    dim("  - Bank:             ", bankResult.address)
   }
 
   cyan(`\nDeploying ReserveRegistry...`)

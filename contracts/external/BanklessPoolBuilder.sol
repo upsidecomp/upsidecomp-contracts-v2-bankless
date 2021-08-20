@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "@pooltogether/pooltogether-contracts/contracts/registry/RegistryInterface.sol";
 import "@pooltogether/pooltogether-contracts/contracts/builders/MultipleWinnersBuilder.sol";
 
-import "./BanklessPrizePoolProxyFactory.sol";
+import "../prize-pool/BanklessPrizePoolProxyFactory.sol";
 
 contract BanklessPoolBuilder {
   using SafeCastUpgradeable for uint256;
@@ -40,7 +40,7 @@ contract BanklessPoolBuilder {
     multipleWinnersBuilder = _multipleWinnersBuilder;
   }
 
-  function createStakeMultipleWinners(
+  function createBanklessMultipleWinners(
     StakePrizePoolConfig memory prizePoolConfig,
     MultipleWinnersBuilder.MultipleWinnersConfig memory prizeStrategyConfig,
     uint8 decimals

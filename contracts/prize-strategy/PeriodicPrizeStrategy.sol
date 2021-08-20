@@ -21,7 +21,7 @@ import "@pooltogether/pooltogether-contracts/contracts/prize-strategy/PeriodicPr
 import "@pooltogether/pooltogether-contracts/contracts/prize-strategy/BeforeAwardListener.sol";
 import "@pooltogether/pooltogether-contracts/contracts/utils/MappedSinglyLinkedList.sol";
 
-import "./../BanklessPrizePool.sol";
+import "../prize-pool/BanklessPrizePool.sol";
 
 /* solium-disable security/no-block-members */
 abstract contract PeriodicPrizeStrategy is Initializable,

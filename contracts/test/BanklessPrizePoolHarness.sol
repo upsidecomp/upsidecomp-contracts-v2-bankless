@@ -1,6 +1,6 @@
 pragma solidity 0.6.12;
 
-import "../BanklessPrizePool.sol";
+import "../prize-pool/BanklessPrizePool.sol";
 
 /* solium-disable security/no-block-members */
 contract BanklessPrizePoolHarness is BanklessPrizePool {

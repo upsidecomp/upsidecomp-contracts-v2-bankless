@@ -34,18 +34,20 @@ async function main() {
 
   debug('beforeEach deploy rng, forwarder etc...')
 
-  let tokenResult = await deployments.get("Bank")
   let rngServiceMockResult = await deployments.get("RNGServiceMock")
+  let tokenResult = await deployments.get("Bank")
   let reserveResult = await deployments.get('Reserve')
   let banklessPoolBuilder = await deployments.get("BanklessPoolBuilder")
 
+
   const reserve = await hardhat.ethers.getContractAt('Reserve', reserveResult.address, signer)
-  const poolBuilder = await hardhat.ethers.getContractAt('BanklessPoolBuilder', banklessPoolBuilder.address, signer)
   const token = await hardhat.ethers.getContractAt('ERC20Mintable', tokenResult.address, signer)
+  const poolBuilder = await hardhat.ethers.getContractAt('BanklessPoolBuilder', banklessPoolBuilder.address, signer)
 
   let linkToken = await ERC20Mintable.deploy('Link Token', 'LINK')
   let rngServiceMock = await hardhat.ethers.getContractAt('RNGServiceMock', rngServiceMockResult.address, signer)
   await rngServiceMock.setRequestFee(linkToken.address, toWei('1'))
+
 
   const multipleWinnersConfig = {
     proxyAdmin: AddressZero,
@@ -63,17 +65,16 @@ async function main() {
     numberOfWinners: 1
   }
 
-
   debug('deploying bank stake pool')
   const stakePoolConfig = {
     token: tokenResult.address,
     maxExitFeeMantissa: params.maxExitFeeMantissa
   }
 
-  let tx = await poolBuilder.createStakeMultipleWinners(stakePoolConfig, multipleWinnersConfig, token.decimals())
+  let tx = await poolBuilder.createBanklessMultipleWinners(stakePoolConfig, multipleWinnersConfig, token.decimals())
   let events = await getEvents(poolBuilder, tx)
   let event = events[0]
-  let prizePool = await hardhat.ethers.getContractAt('StakePrizePoolHarness', event.args.prizePool, signer)
+  let prizePool = await hardhat.ethers.getContractAt('BanklessPrizePoolHarness', event.args.prizePool, signer)
   debug("created prizePool: ", prizePool.address)
 
   let sponsorship = await hardhat.ethers.getContractAt('ControlledToken', (await prizePool.tokens())[0], signer)

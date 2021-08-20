@@ -3,7 +3,7 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-import "../BanklessMultipleWinners.sol";
+import "../prize-strategy/multiple-winners/BanklessMultipleWinners.sol";
 
 /// @title Creates a minimal proxy to the MultipleWinners prize strategy.  Very cheap to deploy.
 contract BanklessMultipleWinnersHarness is BanklessMultipleWinners {
