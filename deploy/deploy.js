@@ -202,18 +202,18 @@ module.exports = async (hardhat) => {
     let multipleWinnersProxyFactoryResult
     cyan("\nDeploying MultipleWinnersProxyFactory...")
     if (isTestEnvironment && !harnessDisabled) {
-      multipleWinnersProxyFactoryResult = await deploy("MultipleWinnersProxyFactory", {
-        contract: 'MultipleWinnersHarnessProxyFactory',
+      multipleWinnersProxyFactoryResult = await deploy("BanklessMultipleWinnersProxyFactory", {
+        contract: 'BanklessMultipleWinnersHarnessProxyFactory',
         from: deployer,
         skipIfAlreadyDeployed: false
       })
     } else {
-      multipleWinnersProxyFactoryResult = await deploy("MultipleWinnersProxyFactory", {
+      multipleWinnersProxyFactoryResult = await deploy("BanklessMultipleWinnersProxyFactory", {
         from: deployer,
         skipIfAlreadyDeployed: false
       })
     }
-    displayResult('MultipleWinnersProxyFactory', multipleWinnersProxyFactoryResult)
+    displayResult('BanklessMultipleWinnersProxyFactory', multipleWinnersProxyFactoryResult)
     return multipleWinnersProxyFactoryResult;
   }
 
