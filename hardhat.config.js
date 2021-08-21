@@ -11,10 +11,10 @@ require('solidity-coverage')
 require("@nomiclabs/hardhat-etherscan")
 require('hardhat-abi-exporter')
 
-const testnetAdmin = '0xE0F4217390221aF47855E094F6e112D43C8698fE' // Account 1
-const testnetUser1 = '0xeedDf4937E3A7aBe03E08963C3c20affbD770b51' // Account 3
-const testnetUser2 = '0xcE53382F96FdE0DB592574ed2571B3307dB859Ce' // Account 4
-const testnetUser3 = '0x381843c8b4a4a0Da3C0800708c84AA2d792D22b1' // Account 5
+const testnetAdmin = '0xe693cb9ca5ec4b2f6a4111ae53308bef811e9e3e' // Account 1
+const testnetUser1 = '0x2976134d99b6c9ac1bc8d6407f07b31c9247c230' // Account 3
+const testnetUser2 = '0x1e33edfd7bb11ea57cc8e2bd7547ccfef8f21e6f' // Account 4
+const testnetUser3 = '0x36e1d0a149b5ab87c74e91cbd4903fef709421c6' // Account 5
 
 const optimizerEnabled = !process.env.OPTIMIZER_DISABLED
 
@@ -48,7 +48,7 @@ const config = {
     },
     reserveRegistry: {
       1: '0x3e8b9901dBFE766d3FE44B36c180A1bca2B9A295', // mainnet
-      4: '0xaDae16a9A1B648Cdc753558Dc19780Ea824a3904', // rinkeby
+      4: '0x648979EC0b11f5f6E036cCC43A360d2DDF270242', // rinkeby
       42: '0xdcC0D09beE9726E23256ebC059B7487Cd78F65a0', // kovan
       100: '0x20F29CCaE4c9886964033042c6b79c2C4C816308', // xdai
       77: '0x4d1639e4b237BCab6F908A1CEb0995716D5ebE36', // poaSokol

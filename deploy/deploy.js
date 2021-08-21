@@ -166,7 +166,6 @@ module.exports = async (hardhat) => {
     yellow(`Using existing reserve registry ${reserveRegistry}`)
   }
 
-
   const deployControlledTokenProxyFactory = async () => {
     cyan("\nDeploying ControlledTokenProxyFactory...")
     const controlledTokenProxyFactoryResult = await deploy("ControlledTokenProxyFactory", {
@@ -176,7 +175,6 @@ module.exports = async (hardhat) => {
     displayResult('ControlledTokenProxyFactory', controlledTokenProxyFactoryResult)
     return controlledTokenProxyFactoryResult;
   }
-
 
   const deployTicketProxyFactory = async () => {
     cyan("\nDeploying TicketProxyFactory...")
