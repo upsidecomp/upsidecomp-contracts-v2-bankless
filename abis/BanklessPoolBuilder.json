@@ -1,0 +1,179 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "contract RegistryInterface",
+        "name": "_reserveRegistry",
+        "type": "address"
+      },
+      {
+        "internalType": "contract BanklessPrizePoolProxyFactory",
+        "name": "_banklessPrizePoolProxyFactory",
+        "type": "address"
+      },
+      {
+        "internalType": "contract BanklessMultipleWinnersBuilder",
+        "name": "_multipleWinnersBuilder",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "contract BanklessPrizePool",
+        "name": "prizePool",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "contract BanklessMultipleWinners",
+        "name": "prizeStrategy",
+        "type": "address"
+      }
+    ],
+    "name": "BanklessPrizePoolWithMultipleWinnersCreated",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "banklessPrizePoolProxyFactory",
+    "outputs": [
+      {
+        "internalType": "contract BanklessPrizePoolProxyFactory",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "contract IERC20Upgradeable",
+            "name": "token",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxExitFeeMantissa",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct BanklessPoolBuilder.BanklessPrizePoolConfig",
+        "name": "prizePoolConfig",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "contract RNGInterface",
+            "name": "rngService",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "prizePeriodStart",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "prizePeriodSeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "ticketName",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "ticketSymbol",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "sponsorshipName",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "sponsorshipSymbol",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "ticketCreditLimitMantissa",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "ticketCreditRateMantissa",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "numberOfWinners",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "splitExternalErc20Awards",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct BanklessMultipleWinnersBuilder.MultipleWinnersConfig",
+        "name": "prizeStrategyConfig",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint8",
+        "name": "decimals",
+        "type": "uint8"
+      }
+    ],
+    "name": "createBanklessMultipleWinners",
+    "outputs": [
+      {
+        "internalType": "contract BanklessPrizePool",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "multipleWinnersBuilder",
+    "outputs": [
+      {
+        "internalType": "contract BanklessMultipleWinnersBuilder",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "reserveRegistry",
+    "outputs": [
+      {
+        "internalType": "contract RegistryInterface",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

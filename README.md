@@ -1,26 +1,14 @@
 
-<p align="center">
-  <a href="https://github.com/pooltogether/pooltogether--brand-assets">
-    <img src="https://github.com/pooltogether/pooltogether--brand-assets/blob/977e03604c49c63314450b5d432fe57d34747c66/logo/pooltogether-logo--purple-gradient.png?raw=true" alt="PoolTogether Brand" style="max-width:100%;" width="200">
-  </a>
-</p>
+# Upside x BanklessDAO - No-Loss NFT Giveaways
 
-<br />
-
-# PoolTogether Prize Savings Protocol
-
-[![<PoolTogether>](https://circleci.com/gh/pooltogether/pooltogether-pool-contracts.svg?style=shield)](https://circleci.com/gh/pooltogether/pooltogether-pool-contracts) [![Coverage Status](https://coveralls.io/repos/github/pooltogether/pooltogether-pool-contracts/badge.svg?branch=master&service=github&kill_cache=2)](https://coveralls.io/github/pooltogether/pooltogether-pool-contracts?branch=master) [![built-with openzeppelin](https://img.shields.io/badge/built%20with-OpenZeppelin-3677FF)](https://docs.openzeppelin.com/)
-
-The [PoolTogether](https://www.pooltogether.com/) Prize Savings Protocol Ethereum smart contracts.
-
-For an overview of the concepts and API please see the [documentation](https://docs.pooltogether.com/)
+[Upside](https://www.upsidecomp.com/) No-Loss NFT Protocol.
 
 # Setup
 
 This project is available as an NPM package:
 
 ```bash
-$ yarn add @pooltogether/pooltogether-contracts
+$ yarn add @upsidecomp-contracts-bankless
 ```
 
 # Usage
@@ -30,22 +18,22 @@ $ yarn add @pooltogether/pooltogether-contracts
 There are deployment artifacts available in the `deployments/` directory. For example, to pull in the PoolWithMultipleWinnersBuilder artifact:
 
 ```javascript
-const PoolWithMultipleWinnersBuilder = require('@pooltogether/pooltogether-contracts/deployments/rinkeby/PoolWithMultipleWinnersBuilder.json')
+const BanklessPoolBuilder = require('@upsidecomp/upsidecomp-contracts-bankless/deployments/rinkeby/BanklessPoolBuilder.json')
 const {
   abi,
   address,
   receipt
- } = PoolWithMultipleWinnersBuilder
+ } = BanklessPoolBuilder
 ```
 
 ## ABIs
 
-Application Binary Interfaces for all PoolTogether contracts and related contracts are available in the `abis/` directory.
+Application Binary Interfaces for all Upside contracts and related contracts are available in the `abis/` directory.
 
 For example, to pull in the PrizePool ABI:
 
 ```javascript
-const PrizePool = require('@pooltogether/pooltogether-contracts/abis/PrizePool.json')
+const BanklessPrizePool = require('@upsidecomp/upsidecomp-contracts-bankless/abis/BanklessPrizePool.json')
 ```
 
 # Development
