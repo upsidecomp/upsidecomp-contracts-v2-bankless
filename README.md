@@ -1,7 +1,7 @@
 
 # Upside x BanklessDAO - No-Loss NFT Giveaways
 
-[Upside](https://www.upsidecomp.com/) No-Loss NFT Protocol.
+[Upside Protocol](https://www.upsidecomp.com/): No-Loss NFT Giveaways
 
 # Setup
 
@@ -18,7 +18,7 @@ $ yarn add @upsidecomp-contracts-bankless
 There are deployment artifacts available in the `deployments/` directory. For example, to pull in the PoolWithMultipleWinnersBuilder artifact:
 
 ```javascript
-const BanklessPoolBuilder = require('@upsidecomp/upsidecomp-contracts-bankless/deployments/rinkeby/BanklessPoolBuilder.json')
+const BanklessPoolBuilder = require('@upsidecomp/upsidecomp-contracts-bankless-core/deployments/rinkeby/BanklessPoolBuilder.json')
 const {
   abi,
   address,
@@ -33,7 +33,7 @@ Application Binary Interfaces for all Upside contracts and related contracts are
 For example, to pull in the PrizePool ABI:
 
 ```javascript
-const BanklessPrizePool = require('@upsidecomp/upsidecomp-contracts-bankless/abis/BanklessPrizePool.json')
+const BanklessPrizePool = require('@upsidecomp/upsidecomp-contracts-bankless-core/abis/BanklessPrizePool.json')
 ```
 
 # Development
