@@ -5,6 +5,10 @@ const {
   getPrizePoolAddressFromBuilderTransaction,
 } = require('../helpers/runPoolLifecycle')
 
+const debug = require('debug')('ptv3:deployBankless')
+
+const { getEvents } = require('../../test/helpers/getEvents')
+
 function dim() {
   console.log(chalk.dim.call(chalk, ...arguments))
 }
@@ -13,23 +17,31 @@ function green() {
   console.log(chalk.green.call(chalk, ...arguments))
 }
 
-const { ethers, getNamedAccounts } = hardhat
-
 async function run() {
-  let banklessPoolBuilder = await deployments.get("BanklessPoolBuilder")
+  const { getNamedAccounts, deployments, getChainId, ethers } = hardhat
+  const toWei = ethers.utils.parseEther
+  let {
+    deployer,
+    rng,
+    admin,
+    sablier,
+    reserveRegistry,
+  } = await getNamedAccounts()
 
-  const { deployer, admin, rng } = await getNamedAccounts()
-  const signer = await ethers.provider.getSigner(admin)
-  console.log(`Using admin address: ${admin}\n`)
+  const signer = await ethers.provider.getSigner(deployer)
+  debug(`Using deployer address: ${deployer}\n`)
+  debug(`Using admin address: ${admin}\n`)
+  debug(`Using rng address: ${rng}\n`)
 
-  const builder = await ethers.getContract('BanklessPoolBuilder', signer)
-
-  dim(`Using BanklessPoolBuilder @ ${builder.address}`)
-  dim(`Using RNG Service @ ${rng}`)
-
-  const block = await ethers.provider.getBlock()
 
   let tokenResult = await deployments.get("Bank")
+  let banklessPoolBuilder = await deployments.get("BanklessPoolBuilder")
+  const builder = await hardhat.ethers.getContractAt('BanklessPoolBuilder', banklessPoolBuilder.address, signer)
+
+  debug(`Using BanklessPoolBuilder @ ${builder.address}`)
+  debug(`Using RNG Service @ ${rng}`)
+
+  const block = await ethers.provider.getBlock()
 
   const banklessPrizePoolConfig = {
     token: tokenResult.address,
@@ -50,18 +62,12 @@ async function run() {
     numberOfWinners: 1,
   }
 
-  dim(`Creating Bankless Prize Pool...`)
+  debug(`Creating Bankless Prize Pool...`)
 
-  const tx = await builder.createBanklessMultipleWinners(
-    banklessPrizePoolConfig,
-    multipleWinnersConfig,
-    18
-  )
-
-  // const address = await getPrizePoolAddressFromBuilderTransaction(tx)
-  // const prizePool = await ethers.getContractAt('BanklessPrizePool', address, signer)
-
-  green(`Created BanklessPrizePool ${prizePool.address}`)
+  let tx = await builder.createBanklessMultipleWinners(banklessPrizePoolConfig, multipleWinnersConfig, 18)
+  await ethers.provider.waitForTransaction(tx.hash);
+  let addr = await getPrizePoolAddressFromBuilderTransaction(tx);
+  debug("created prizePool: ", addr)
 
   // await runPoolLifecycle(prizePool, usdtHolder)
 }
