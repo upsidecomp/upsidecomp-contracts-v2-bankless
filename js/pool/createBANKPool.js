@@ -76,7 +76,6 @@ async function run() {
 
   debug(`sponsorship: ${sponsorship.address}, ticket: ${ticket.address}`)
 
-
   // await runPoolLifecycle(prizePool, usdtHolder)
 }
 

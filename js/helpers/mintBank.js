@@ -17,7 +17,7 @@ async function mintBank() {
 
   const { deployer, admin } = await getNamedAccounts()
 
-  const user = "0x048d0BB5AD612f817a554f0EF56b0585e9460294"
+  const user = "0x048d0BB5AD612f817a554f0EF56b0585e9460294" // fix: address
   const signer = await ethers.provider.getSigner(admin)
 
   let tokenResult = await deployments.get("Bank")
