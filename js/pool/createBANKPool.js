@@ -40,6 +40,7 @@ async function run() {
 
   debug(`Using BanklessPoolBuilder @ ${builder.address}`)
   debug(`Using RNG Service @ ${rng}`)
+  debug(`Using BANK @ ${tokenResult.address}`)
 
   const block = await ethers.provider.getBlock()
 
@@ -66,8 +67,15 @@ async function run() {
 
   let tx = await builder.createBanklessMultipleWinners(banklessPrizePoolConfig, multipleWinnersConfig, 18)
   await ethers.provider.waitForTransaction(tx.hash);
-  let addr = await getPrizePoolAddressFromBuilderTransaction(tx);
-  debug("created prizePool: ", addr)
+  let prizePoolAddress = await getPrizePoolAddressFromBuilderTransaction(tx);
+  let prizePool = await hardhat.ethers.getContractAt('BanklessPrizePool', prizePoolAddress, signer)
+  debug("created prizePool: ", prizePool.address)
+
+  let sponsorship = await hardhat.ethers.getContractAt('ControlledToken', (await prizePool.tokens())[0], signer)
+  let ticket = await hardhat.ethers.getContractAt('Ticket', (await prizePool.tokens())[1], signer)
+
+  debug(`sponsorship: ${sponsorship.address}, ticket: ${ticket.address}`)
+
 
   // await runPoolLifecycle(prizePool, usdtHolder)
 }

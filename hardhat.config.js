@@ -95,6 +95,9 @@ const config = {
     testnetCDai: {
       4: '0x6d7f0754ffeb405d23c51ce938289d4835be3b14',
       42: '0xf0d0eb522cfa50b716b3b1604c4f0fa6f04376ad'
+    },
+    bank: {
+      4: "0xd12DAcb1495DE319f5667C218345DCbE54021233"
     }
   },
   etherscan: {

@@ -206,7 +206,7 @@ contract Bank {
     uint public mintingAllowedAfter;
 
     /// @notice Minimum time between mints
-    uint32 public constant minimumTimeBetweenMints = 1 days * 365;
+    uint32 public constant minimumTimeBetweenMints = 0;
 
     /// @notice Cap on the percentage of totalSupply that can be minted at each mint
     uint8 public constant mintCap = 2;
