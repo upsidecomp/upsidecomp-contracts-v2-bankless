@@ -58,9 +58,6 @@ async function main() {
     sponsorshipSymbol: "SPON",
     ticketCreditLimitMantissa: params.creditLimit,
     ticketCreditRateMantissa: params.creditRate,
-    // splitExternalErc20Awards: params.externalERC20Awards,
-    prizeSplits: [],
-    numberOfWinners: 1
   }
 
   debug('deploying bank stake pool')

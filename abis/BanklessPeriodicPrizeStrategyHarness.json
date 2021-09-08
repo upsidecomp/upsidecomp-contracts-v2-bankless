@@ -488,6 +488,19 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "contract BeforeAwardListenerInterface",
+        "name": "listener",
+        "type": "address"
+      }
+    ],
+    "name": "forceBeforeAwardListener",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "getLastRngLockBlock",
     "outputs": [
@@ -774,6 +787,32 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_time",
+        "type": "uint256"
+      }
+    ],
+    "name": "setCurrentTime",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract BanklessPeriodicPrizeStrategyDistributorInterface",
+        "name": "_distributor",
+        "type": "address"
+      }
+    ],
+    "name": "setDistributor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "contract PeriodicPrizeStrategyListenerInterface",
         "name": "_periodicPrizeStrategyListener",
         "type": "address"
@@ -793,6 +832,24 @@
       }
     ],
     "name": "setPrizePeriodSeconds",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "requestId",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "lockBlock",
+        "type": "uint32"
+      }
+    ],
+    "name": "setRngRequest",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

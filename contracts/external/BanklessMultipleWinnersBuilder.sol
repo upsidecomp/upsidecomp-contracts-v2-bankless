@@ -21,8 +21,6 @@ contract BanklessMultipleWinnersBuilder {
     string sponsorshipSymbol;
     uint256 ticketCreditLimitMantissa;
     uint256 ticketCreditRateMantissa;
-    uint256 numberOfWinners;
-    // BanklessMultipleWinners.PrizeSplitConfig[] prizeSplits;
     bool splitExternalErc20Awards;
   }
 
@@ -67,15 +65,8 @@ contract BanklessMultipleWinnersBuilder {
       prizePool,
       ticket,
       sponsorship,
-      prizeStrategyConfig.rngService,
-      prizeStrategyConfig.numberOfWinners
+      prizeStrategyConfig.rngService
     );
-
-    // mw.setPrizeSplits(prizeStrategyConfig.prizeSplits);
-
-    // if (prizeStrategyConfig.splitExternalErc20Awards) {
-      // mw.setSplitExternalErc20Awards(true);
-    // }
 
     mw.transferOwnership(owner);
 

@@ -8,10 +8,6 @@ import "@pooltogether/pooltogether-contracts/contracts/prize-strategy/PrizeSplit
 import "../PeriodicPrizeStrategy.sol";
 
 contract BanklessMultipleWinners is PeriodicPrizeStrategy {
-
-  // Maximum number number of winners per award distribution period
-  uint256 internal __numberOfWinners;
-
   // Mapping of addresses isBlocked status. Can prevent an address from selected during award distribution
   mapping(address => bool) public isBlocklisted;
 
@@ -20,13 +16,6 @@ contract BanklessMultipleWinners is PeriodicPrizeStrategy {
 
   // Limit ticket.draw() retry attempts when a blocked address is selected in _distribute.
   uint256 public blocklistRetryCount;
-
-  /**
-    * @notice Emitted when numberOfWinners is set.
-    * @dev Emitted when numberOfWinners is set, which limits the maximum number of potentially selected winners.
-    * @param numberOfWinners Maximum potentially selected winners
-  */
-  event NumberOfWinnersSet(uint256 numberOfWinners);
 
   /**
     * @notice Emitted when carryOverBlocklist is toggled.
@@ -69,8 +58,7 @@ contract BanklessMultipleWinners is PeriodicPrizeStrategy {
     BanklessPrizePool _prizePool,
     TicketInterface _ticket,
     IERC20Upgradeable _sponsorship,
-    RNGInterface _rng,
-    uint256 _numberOfWinners
+    RNGInterface _rng
   ) public initializer {
     PeriodicPrizeStrategy.initialize(
       _prizePeriodStart,
@@ -80,8 +68,6 @@ contract BanklessMultipleWinners is PeriodicPrizeStrategy {
       _sponsorship,
       _rng
     );
-
-    _setNumberOfWinners(_numberOfWinners);
   }
 
   /**
@@ -125,32 +111,12 @@ contract BanklessMultipleWinners is PeriodicPrizeStrategy {
   }
 
   /**
-    * @notice Sets maximum number of winners.
-    * @dev Sets maximum number of winners per award distribution period.
-    * @param count Number of winners.
-  */
-  function setNumberOfWinners(uint256 count) external onlyOwner requireAwardNotInProgress {
-    _setNumberOfWinners(count);
-  }
-
-   /**
-    * @dev Set the maximum number of winners. Must be greater than 0.
-    * @param count Number of winners.
-  */
-  function _setNumberOfWinners(uint256 count) internal {
-    require(count > 0, "MultipleWinners/winners-gte-one");
-
-    __numberOfWinners = count;
-    emit NumberOfWinnersSet(count);
-  }
-
-  /**
     * @notice Maximum number of winners per award distribution period
     * @dev Read maximum number of winners per award distribution period from internal __numberOfWinners variable.
     * @return __numberOfWinners The total number of winners per prize award.
   */
   function numberOfWinners() external view returns (uint256) {
-    return __numberOfWinners;
+    return numberOfPrizes;
   }
 
   /**
@@ -167,7 +133,7 @@ contract BanklessMultipleWinners is PeriodicPrizeStrategy {
     bool _carryOverBlocklistPrizes = carryOverBlocklist;
 
     // main winner is simply the first that is drawn
-    uint256 numberOfWinners = __numberOfWinners;
+    uint256 numberOfWinners = numberOfPrizes;
     address[] memory winners = new address[](numberOfWinners);
     uint256 nextRandom = randomNumber;
     uint256 winnerCount = 0;
@@ -191,7 +157,6 @@ contract BanklessMultipleWinners is PeriodicPrizeStrategy {
       nextRandom = uint256(nextRandomHash);
     }
 
-    // main winner gets all external ERC721 tokens
-    _awardPrize(winners[0]);
+    _awardPrizes(winners);
   }
 }

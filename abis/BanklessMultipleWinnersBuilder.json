@@ -96,11 +96,6 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
-            "name": "numberOfWinners",
-            "type": "uint256"
-          },
-          {
             "internalType": "bool",
             "name": "splitExternalErc20Awards",
             "type": "bool"
