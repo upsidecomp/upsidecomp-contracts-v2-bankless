@@ -115,168 +115,173 @@ describe('PeriodicPrizeStrategy', () => {
   describe('initialize()', () => {
     it('should emit an Initialized event', async () => {
       debug('deploying another prizeStrategy...')
-      // const PeriodicPrizeStrategyHarness =  await hre.ethers.getContractFactory("PeriodicPrizeStrategyHarness", wallet, overrides)
-      //
-      // let prizeStrategy2 = await PeriodicPrizeStrategyHarness.deploy()
-      // await prizeStrategy2.setDistributor(distributor.address)
-      //
-      // initalizeResult2 = prizeStrategy2.initialize(
-      //   prizePeriodStart,
-      //   prizePeriodSeconds,
-      //   prizePool.address,
-      //   ticket.address,
-      //   sponsorship.address,
-      //   rng.address,
-      // )
-      //
-      // await expect(initalizeResult2).to.emit(prizeStrategy2, 'Initialized').withArgs(
-      //   prizePeriodStart,
-      //   prizePeriodSeconds,
-      //   prizePool.address,
-      //   ticket.address,
-      //   sponsorship.address,
-      //   rng.address,
-      // )
+      const PeriodicPrizeStrategyHarness =  await hre.ethers.getContractFactory("BanklessPeriodicPrizeStrategyHarness", wallet, overrides)
+
+      let prizeStrategy2 = await PeriodicPrizeStrategyHarness.deploy()
+      await prizeStrategy2.setDistributor(distributor.address)
+
+      initalizeResult2 = prizeStrategy2.initialize(
+        prizePeriodStart,
+        prizePeriodSeconds,
+        prizePool.address,
+        ticket.address,
+        sponsorship.address,
+        rng.address,
+      )
+
+      await expect(initalizeResult2).to.emit(prizeStrategy2, 'Initialized').withArgs(
+        prizePeriodStart,
+        prizePeriodSeconds,
+        prizePool.address,
+        ticket.address,
+        sponsorship.address,
+        rng.address,
+      )
     })
 
-    // it('should set the params', async () => {
-    //   expect(await prizeStrategy.prizePool()).to.equal(prizePool.address)
-    //   expect(await prizeStrategy.prizePeriodSeconds()).to.equal(prizePeriodSeconds)
-    //   expect(await prizeStrategy.ticket()).to.equal(ticket.address)
-    //   expect(await prizeStrategy.sponsorship()).to.equal(sponsorship.address)
-    //   expect(await prizeStrategy.rng()).to.equal(rng.address)
-    //
-    // })
-    //
-    // it('should reject invalid params', async () => {
-    //   const _initArgs = [
-    //     prizePeriodStart,
-    //     prizePeriodSeconds,
-    //     prizePool.address,
-    //     ticket.address,
-    //     sponsorship.address,
-    //     rng.address,
-    //     []
-    //   ]
-    //   let initArgs
-    //
-    //   debug('deploying secondary prizeStrategy...')
-    //   const PeriodicPrizeStrategyHarness =  await hre.ethers.getContractFactory("PeriodicPrizeStrategyHarness", wallet, overrides)
-    //
-    //   const prizeStrategy2 = await PeriodicPrizeStrategyHarness.deploy()
-    //
-    //   debug('testing initialization of secondary prizeStrategy...')
-    //
-    //   initArgs = _initArgs.slice(); initArgs[1] = 0
-    //   await expect(prizeStrategy2.initialize(...initArgs)).to.be.revertedWith('PeriodicPrizeStrategy/prize-period-greater-than-zero')
-    //   initArgs = _initArgs.slice(); initArgs[2] = AddressZero
-    //   await expect(prizeStrategy2.initialize(...initArgs)).to.be.revertedWith('PeriodicPrizeStrategy/prize-pool-not-zero')
-    //   initArgs = _initArgs.slice(); initArgs[3] = AddressZero
-    //   await expect(prizeStrategy2.initialize(...initArgs)).to.be.revertedWith('PeriodicPrizeStrategy/ticket-not-zero')
-    //   initArgs = _initArgs.slice(); initArgs[4] = AddressZero
-    //   await expect(prizeStrategy2.initialize(...initArgs)).to.be.revertedWith('PeriodicPrizeStrategy/sponsorship-not-zero')
-    //   initArgs = _initArgs.slice(); initArgs[5] = AddressZero
-    //   await expect(prizeStrategy2.initialize(...initArgs)).to.be.revertedWith('PeriodicPrizeStrategy/rng-not-zero')
-    //
-    // })
+    it('should set the params', async () => {
+      expect(await prizeStrategy.prizePool()).to.equal(prizePool.address)
+      expect(await prizeStrategy.prizePeriodSeconds()).to.equal(prizePeriodSeconds)
+      expect(await prizeStrategy.ticket()).to.equal(ticket.address)
+      expect(await prizeStrategy.sponsorship()).to.equal(sponsorship.address)
+      expect(await prizeStrategy.rng()).to.equal(rng.address)
+      expect(await prizeStrategy.numberOfPrizes()).to.equal(0)
+    })
+
+    it('should reject invalid params', async () => {
+      const _initArgs = [
+        prizePeriodStart,
+        prizePeriodSeconds,
+        prizePool.address,
+        ticket.address,
+        sponsorship.address,
+        rng.address,
+      ]
+      let initArgs
+
+      debug('deploying secondary prizeStrategy...')
+      const PeriodicPrizeStrategyHarness =  await hre.ethers.getContractFactory("BanklessPeriodicPrizeStrategyHarness", wallet, overrides)
+
+      const prizeStrategy2 = await PeriodicPrizeStrategyHarness.deploy()
+
+      debug('testing initialization of secondary prizeStrategy...')
+
+      initArgs = _initArgs.slice(); initArgs[1] = 0
+      await expect(prizeStrategy2.initialize(...initArgs)).to.be.revertedWith('PeriodicPrizeStrategy/prize-period-greater-than-zero')
+      initArgs = _initArgs.slice(); initArgs[2] = AddressZero
+      await expect(prizeStrategy2.initialize(...initArgs)).to.be.revertedWith('PeriodicPrizeStrategy/prize-pool-not-zero')
+      initArgs = _initArgs.slice(); initArgs[3] = AddressZero
+      await expect(prizeStrategy2.initialize(...initArgs)).to.be.revertedWith('PeriodicPrizeStrategy/ticket-not-zero')
+      initArgs = _initArgs.slice(); initArgs[4] = AddressZero
+      await expect(prizeStrategy2.initialize(...initArgs)).to.be.revertedWith('PeriodicPrizeStrategy/sponsorship-not-zero')
+      initArgs = _initArgs.slice(); initArgs[5] = AddressZero
+      await expect(prizeStrategy2.initialize(...initArgs)).to.be.revertedWith('PeriodicPrizeStrategy/rng-not-zero')
+    })
   })
-  //
-  // describe('estimateRemainingBlocksToPrize()', () => {
-  //   it('should estimate using the constant', async () => {
-  //     let ppr = await prizeStrategy.prizePeriodRemainingSeconds()
-  //     let blocks = parseInt(ppr.toNumber() / 14)
-  //     expect(await prizeStrategy.estimateRemainingBlocksToPrize(toWei('14'))).to.equal(blocks)
-  //   })
-  // })
-  //
-  // describe('currentPrize()', () => {
-  //   it('should return the currently accrued interest when reserve is zero', async () => {
-  //     await prizePool.mock.awardBalance.returns('100')
-  //     expect(await call(prizeStrategy, 'currentPrize')).equal('100')
-  //   })
-  // })
-  //
-  // describe('prizePeriodRemainingSeconds()', () => {
-  //   it('should calculate the remaining seconds of the prize period', async () => {
-  //     const startTime = await prizeStrategy.prizePeriodStartedAt()
-  //     const halfTime = prizePeriodSeconds / 2
-  //     const overTime = prizePeriodSeconds + 1
-  //
-  //     // Half-time
-  //     await prizeStrategy.setCurrentTime(startTime.add(halfTime))
-  //     expect(await prizeStrategy.prizePeriodRemainingSeconds()).to.equal(halfTime)
-  //
-  //     // Over-time
-  //     await prizeStrategy.setCurrentTime(startTime.add(overTime))
-  //     expect(await prizeStrategy.prizePeriodRemainingSeconds()).to.equal(0)
-  //   })
-  // })
-  //
-  // describe('isPrizePeriodOver()', () => {
-  //   it('should determine if the prize-period is over', async () => {
-  //     const startTime = await prizeStrategy.prizePeriodStartedAt()
-  //     const halfTime = prizePeriodSeconds / 2
-  //     const overTime = prizePeriodSeconds + 1
-  //
-  //     // Half-time
-  //     await prizeStrategy.setCurrentTime(startTime.add(halfTime))
-  //     expect(await prizeStrategy.isPrizePeriodOver()).to.equal(false)
-  //
-  //     // Over-time
-  //     await prizeStrategy.setCurrentTime(startTime.add(overTime))
-  //     expect(await prizeStrategy.isPrizePeriodOver()).to.equal(true)
-  //   })
-  // })
-  //
-  // describe('setRngService', () => {
-  //   it('should only allow the owner to change it', async () => {
-  //     await expect(prizeStrategy.setRngService(token.address))
-  //       .to.emit(prizeStrategy, 'RngServiceUpdated')
-  //       .withArgs(token.address)
-  //   })
-  //
-  //   it('should not allow anyone but the owner to change', async () => {
-  //     prizeStrategy2 = prizeStrategy.connect(wallet2)
-  //     await expect(prizeStrategy2.setRngService(token.address)).to.be.revertedWith('Ownable: caller is not the owner')
-  //   })
-  //
-  //   it('should not be called if an rng request is in flight', async () => {
-  //     await rngFeeToken.mock.allowance.returns(0)
-  //     await rngFeeToken.mock.approve.withArgs(rng.address, toWei('1')).returns(true);
-  //     await rng.mock.requestRandomNumber.returns('11', '1');
-  //     await prizeStrategy.setCurrentTime(await prizeStrategy.prizePeriodEndAt());
-  //     await prizeStrategy.startAward();
-  //
-  //     await expect(prizeStrategy.setRngService(token.address))
-  //       .to.be.revertedWith('PeriodicPrizeStrategy/rng-in-flight');
-  //   });
-  // })
-  //
-  // describe('cancelAward()', () => {
-  //   it('should not allow anyone to cancel if the rng has not timed out', async () => {
-  //     await expect(prizeStrategy.cancelAward()).to.be.revertedWith("PeriodicPrizeStrategy/rng-not-timedout")
-  //   })
-  //
-  //   it('should allow anyone to reset the rng if it times out', async () => {
-  //     await rngFeeToken.mock.allowance.returns(0)
-  //     await rngFeeToken.mock.approve.withArgs(rng.address, toWei('1')).returns(true);
-  //     await rng.mock.requestRandomNumber.returns('11', '1');
-  //     await prizeStrategy.setCurrentTime(await prizeStrategy.prizePeriodEndAt());
-  //
-  //     await prizeStrategy.startAward()
-  //
-  //     // set it beyond request timeout
-  //     await prizeStrategy.setCurrentTime((await prizeStrategy.prizePeriodEndAt()).add(await prizeStrategy.rngRequestTimeout()).add(1));
-  //
-  //     // should be timed out
-  //     expect(await prizeStrategy.isRngTimedOut()).to.be.true
-  //
-  //     await expect(prizeStrategy.cancelAward())
-  //       .to.emit(prizeStrategy, 'PrizePoolAwardCancelled')
-  //       .withArgs(wallet.address, prizePool.address, 11, 1)
-  //   })
-  // })
-  //
+
+
+  describe('estimateRemainingBlocksToPrize()', () => {
+    it('should estimate using the constant', async () => {
+      let ppr = await prizeStrategy.prizePeriodRemainingSeconds()
+      let blocks = parseInt(ppr.toNumber() / 14)
+      expect(await prizeStrategy.estimateRemainingBlocksToPrize(toWei('14'))).to.equal(blocks)
+    })
+  })
+
+  describe('prizePeriodRemainingSeconds()', () => {
+    it('should calculate the remaining seconds of the prize period', async () => {
+      const startTime = await prizeStrategy.prizePeriodStartedAt()
+      const halfTime = prizePeriodSeconds / 2
+      const overTime = prizePeriodSeconds + 1
+
+      // Half-time
+      await prizeStrategy.setCurrentTime(startTime.add(halfTime))
+      expect(await prizeStrategy.prizePeriodRemainingSeconds()).to.equal(halfTime)
+
+      // Over-time
+      await prizeStrategy.setCurrentTime(startTime.add(overTime))
+      expect(await prizeStrategy.prizePeriodRemainingSeconds()).to.equal(0)
+    })
+  })
+
+  describe('isPrizePeriodOver()', () => {
+    it('should determine if the prize-period is over', async () => {
+      const startTime = await prizeStrategy.prizePeriodStartedAt()
+      const halfTime = prizePeriodSeconds / 2
+      const overTime = prizePeriodSeconds + 1
+
+      // Half-time
+      await prizeStrategy.setCurrentTime(startTime.add(halfTime))
+      expect(await prizeStrategy.isPrizePeriodOver()).to.equal(false)
+
+      // Over-time
+      await prizeStrategy.setCurrentTime(startTime.add(overTime))
+      expect(await prizeStrategy.isPrizePeriodOver()).to.equal(true)
+    })
+  })
+
+  describe('setRngService', () => {
+    it('should only allow the owner to change it', async () => {
+      await expect(prizeStrategy.setRngService(token.address))
+        .to.emit(prizeStrategy, 'RngServiceUpdated')
+        .withArgs(token.address)
+    })
+
+    it('should not allow anyone but the owner to change', async () => {
+      prizeStrategy2 = prizeStrategy.connect(wallet2)
+      await expect(prizeStrategy2.setRngService(token.address)).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
+    it('should not be called if an rng request is in flight', async () => {
+      await rngFeeToken.mock.allowance.returns(0)
+      await rngFeeToken.mock.approve.withArgs(rng.address, toWei('1')).returns(true);
+      await rng.mock.requestRandomNumber.returns('11', '1');
+      await prizeStrategy.setCurrentTime(await prizeStrategy.prizePeriodEndAt());
+      await prizeStrategy.startAward();
+
+      await expect(prizeStrategy.setRngService(token.address))
+        .to.be.revertedWith('PeriodicPrizeStrategy/rng-in-flight');
+    });
+  })
+
+  describe('cancelAward()', () => {
+    it('should not allow anyone to cancel if the rng has not timed out', async () => {
+      await expect(prizeStrategy.cancelAward()).to.be.revertedWith("PeriodicPrizeStrategy/rng-not-timedout")
+    })
+
+    it('should allow anyone to reset the rng if it times out', async () => {
+      await rngFeeToken.mock.allowance.returns(0)
+      await rngFeeToken.mock.approve.withArgs(rng.address, toWei('1')).returns(true);
+      await rng.mock.requestRandomNumber.returns('11', '1');
+      await prizeStrategy.setCurrentTime(await prizeStrategy.prizePeriodEndAt());
+
+      await prizeStrategy.startAward()
+
+      // set it beyond request timeout
+      await prizeStrategy.setCurrentTime((await prizeStrategy.prizePeriodEndAt()).add(await prizeStrategy.rngRequestTimeout()).add(1));
+
+      // should be timed out
+      expect(await prizeStrategy.isRngTimedOut()).to.be.true
+
+      await expect(prizeStrategy.cancelAward())
+        .to.emit(prizeStrategy, 'PrizePoolAwardCancelled')
+        .withArgs(wallet.address, prizePool.address, 11, 1)
+    })
+  })
+
+  describe('currentPrizeAddresses()', () => {
+    it('should return the currently accrued interest when reserve is zero', async () => {
+      await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+      await prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1])
+
+      expect(await prizeStrategy.connect(wallet2).currentPrizeAddresses())
+            .to.deep.equal([externalERC721Award.address])
+
+      expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award.address))
+            .to.deep.equal([One])
+    })
+  })
+
   // describe("beforeTokenTransfer()", () => {
   //   it('should not allow users to transfer tokens to themselves', async () => {
   //     await expect(prizePool.call(
@@ -493,71 +498,71 @@ describe('PeriodicPrizeStrategy', () => {
   //   })
   // })
   //
-  // describe('canStartAward()', () => {
-  //   it('should determine if a prize is able to be awarded', async () => {
-  //     const startTime = await prizeStrategy.prizePeriodStartedAt()
-  //
-  //     // Prize-period not over, RNG not requested
-  //     await prizeStrategy.setCurrentTime(startTime.add(10))
-  //     await prizeStrategy.setRngRequest(0, 0)
-  //     expect(await prizeStrategy.canStartAward()).to.equal(false)
-  //
-  //     // Prize-period not over, RNG requested
-  //     await prizeStrategy.setCurrentTime(startTime.add(10))
-  //     await prizeStrategy.setRngRequest(1, 100)
-  //     expect(await prizeStrategy.canStartAward()).to.equal(false)
-  //
-  //     // Prize-period over, RNG requested
-  //     await prizeStrategy.setCurrentTime(startTime.add(prizePeriodSeconds))
-  //     await prizeStrategy.setRngRequest(1, 100)
-  //     expect(await prizeStrategy.canStartAward()).to.equal(false)
-  //
-  //     // Prize-period over, RNG not requested
-  //     await prizeStrategy.setCurrentTime(startTime.add(prizePeriodSeconds))
-  //     await prizeStrategy.setRngRequest(0, 0)
-  //     expect(await prizeStrategy.canStartAward()).to.equal(true)
-  //   })
-  // })
-  //
-  // describe('canCompleteAward()', () => {
-  //   it('should determine if a prize is able to be completed', async () => {
-  //     // RNG not requested, RNG not completed
-  //     await prizeStrategy.setRngRequest(0, 0)
-  //     await rng.mock.isRequestComplete.returns(false)
-  //     expect(await prizeStrategy.canCompleteAward()).to.equal(false)
-  //
-  //     // RNG requested, RNG not completed
-  //     await prizeStrategy.setRngRequest(1, 100)
-  //     await rng.mock.isRequestComplete.returns(false)
-  //     expect(await prizeStrategy.canCompleteAward()).to.equal(false)
-  //
-  //     // RNG requested, RNG completed
-  //     await prizeStrategy.setRngRequest(1, 100)
-  //     await rng.mock.isRequestComplete.returns(true)
-  //     expect(await prizeStrategy.canCompleteAward()).to.equal(true)
-  //   })
-  // })
-  //
-  // describe('getLastRngLockBlock()', () => {
-  //   it('should return the lock-block for the last RNG request', async () => {
-  //     await prizeStrategy.setRngRequest(0, 0)
-  //     expect(await prizeStrategy.getLastRngLockBlock()).to.equal(0)
-  //
-  //     await prizeStrategy.setRngRequest(1, 123)
-  //     expect(await prizeStrategy.getLastRngLockBlock()).to.equal(123)
-  //   })
-  // })
-  //
-  // describe('getLastRngRequestId()', () => {
-  //   it('should return the Request ID for the last RNG request', async () => {
-  //     await prizeStrategy.setRngRequest(0, 0)
-  //     expect(await prizeStrategy.getLastRngRequestId()).to.equal(0)
-  //
-  //     await prizeStrategy.setRngRequest(1, 123)
-  //     expect(await prizeStrategy.getLastRngRequestId()).to.equal(1)
-  //   })
-  // })
-  //
+  describe('canStartAward()', () => {
+    it('should determine if a prize is able to be awarded', async () => {
+      const startTime = await prizeStrategy.prizePeriodStartedAt()
+
+      // Prize-period not over, RNG not requested
+      await prizeStrategy.setCurrentTime(startTime.add(10))
+      await prizeStrategy.setRngRequest(0, 0)
+      expect(await prizeStrategy.canStartAward()).to.equal(false)
+
+      // Prize-period not over, RNG requested
+      await prizeStrategy.setCurrentTime(startTime.add(10))
+      await prizeStrategy.setRngRequest(1, 100)
+      expect(await prizeStrategy.canStartAward()).to.equal(false)
+
+      // Prize-period over, RNG requested
+      await prizeStrategy.setCurrentTime(startTime.add(prizePeriodSeconds))
+      await prizeStrategy.setRngRequest(1, 100)
+      expect(await prizeStrategy.canStartAward()).to.equal(false)
+
+      // Prize-period over, RNG not requested
+      await prizeStrategy.setCurrentTime(startTime.add(prizePeriodSeconds))
+      await prizeStrategy.setRngRequest(0, 0)
+      expect(await prizeStrategy.canStartAward()).to.equal(true)
+    })
+  })
+
+  describe('canCompleteAward()', () => {
+    it('should determine if a prize is able to be completed', async () => {
+      // RNG not requested, RNG not completed
+      await prizeStrategy.setRngRequest(0, 0)
+      await rng.mock.isRequestComplete.returns(false)
+      expect(await prizeStrategy.canCompleteAward()).to.equal(false)
+
+      // RNG requested, RNG not completed
+      await prizeStrategy.setRngRequest(1, 100)
+      await rng.mock.isRequestComplete.returns(false)
+      expect(await prizeStrategy.canCompleteAward()).to.equal(false)
+
+      // RNG requested, RNG completed
+      await prizeStrategy.setRngRequest(1, 100)
+      await rng.mock.isRequestComplete.returns(true)
+      expect(await prizeStrategy.canCompleteAward()).to.equal(true)
+    })
+  })
+
+  describe('getLastRngLockBlock()', () => {
+    it('should return the lock-block for the last RNG request', async () => {
+      await prizeStrategy.setRngRequest(0, 0)
+      expect(await prizeStrategy.getLastRngLockBlock()).to.equal(0)
+
+      await prizeStrategy.setRngRequest(1, 123)
+      expect(await prizeStrategy.getLastRngLockBlock()).to.equal(123)
+    })
+  })
+
+  describe('getLastRngRequestId()', () => {
+    it('should return the Request ID for the last RNG request', async () => {
+      await prizeStrategy.setRngRequest(0, 0)
+      expect(await prizeStrategy.getLastRngRequestId()).to.equal(0)
+
+      await prizeStrategy.setRngRequest(1, 123)
+      expect(await prizeStrategy.getLastRngRequestId()).to.equal(1)
+    })
+  })
+
   // describe('setBeforeAwardListener()', () => {
   //   let beforeAwardListener
   //
@@ -612,31 +617,31 @@ describe('PeriodicPrizeStrategy', () => {
   //       .withArgs(ethers.constants.AddressZero)
   //   })
   // })
-  //
-  // describe('setTokenListener()', () => {
-  //   it('should allow the owner to change the listener', async () => {
-  //     await expect(prizeStrategy.setTokenListener(tokenListener.address))
-  //       .to.emit(prizeStrategy, 'TokenListenerUpdated')
-  //       .withArgs(tokenListener.address)
-  //   })
-  //
-  //   it('should not allow anyone else to change the listener', async () => {
-  //     await expect(prizeStrategy.connect(wallet2).setTokenListener(tokenListener.address))
-  //       .to.be.revertedWith("Ownable: caller is not the owner")
-  //   })
-  //
-  //   it('should not allow setting an EOA as a listener', async () => {
-  //     await expect(prizeStrategy.setTokenListener(wallet2.address))
-  //       .to.be.revertedWith("PeriodicPrizeStrategy/token-listener-invalid");
-  //   })
-  //
-  //   it('should allow setting the listener to null', async () => {
-  //     await expect(prizeStrategy.setTokenListener(ethers.constants.AddressZero))
-  //       .to.emit(prizeStrategy, 'TokenListenerUpdated')
-  //       .withArgs(ethers.constants.AddressZero)
-  //   })
-  // })
-  //
+
+  describe('setTokenListener()', () => {
+    it('should allow the owner to change the listener', async () => {
+      await expect(prizeStrategy.setTokenListener(tokenListener.address))
+        .to.emit(prizeStrategy, 'TokenListenerUpdated')
+        .withArgs(tokenListener.address)
+    })
+
+    it('should not allow anyone else to change the listener', async () => {
+      await expect(prizeStrategy.connect(wallet2).setTokenListener(tokenListener.address))
+        .to.be.revertedWith("Ownable: caller is not the owner")
+    })
+
+    it('should not allow setting an EOA as a listener', async () => {
+      await expect(prizeStrategy.setTokenListener(wallet2.address))
+        .to.be.revertedWith("PeriodicPrizeStrategy/token-listener-invalid");
+    })
+
+    it('should allow setting the listener to null', async () => {
+      await expect(prizeStrategy.setTokenListener(ethers.constants.AddressZero))
+        .to.emit(prizeStrategy, 'TokenListenerUpdated')
+        .withArgs(ethers.constants.AddressZero)
+    })
+  })
+
   // describe('completeAward()', () => {
   //   it('should award the winner', async () => {
   //     debug('Setting time')
@@ -686,37 +691,37 @@ describe('PeriodicPrizeStrategy', () => {
   //   })
   // })
   //
-  // describe('calculateNextPrizePeriodStartTime()', () => {
-  //   it('should always sync to the last period start time', async () => {
-  //     let startedAt = await prizeStrategy.prizePeriodStartedAt();
-  //     expect(await prizeStrategy.calculateNextPrizePeriodStartTime(startedAt.add(prizePeriodSeconds * 14))).to.equal(startedAt.add(prizePeriodSeconds * 14))
-  //   })
-  //
-  //   it('should return the current if it is within', async () => {
-  //     let startedAt = await prizeStrategy.prizePeriodStartedAt();
-  //     expect(await prizeStrategy.calculateNextPrizePeriodStartTime(startedAt.add(prizePeriodSeconds / 2))).to.equal(startedAt)
-  //   })
-  //
-  //   it('should return the next if it is after', async () => {
-  //     let startedAt = await prizeStrategy.prizePeriodStartedAt();
-  //     expect(await prizeStrategy.calculateNextPrizePeriodStartTime(startedAt.add(parseInt(prizePeriodSeconds * 1.5)))).to.equal(startedAt.add(prizePeriodSeconds))
-  //   })
-  // })
-  //
-  // describe('setPrizePeriodSeconds()', () => {
-  //   it('should allow the owner to set the prize period', async () => {
-  //     await expect(prizeStrategy.setPrizePeriodSeconds(99))
-  //       .to.emit(prizeStrategy, 'PrizePeriodSecondsUpdated')
-  //       .withArgs(99)
-  //
-  //     expect(await prizeStrategy.prizePeriodSeconds()).to.equal(99)
-  //   })
-  //
-  //   it('should not allow non-owners to set the prize period', async () => {
-  //     await expect(prizeStrategy.connect(wallet2).setPrizePeriodSeconds(99)).to.be.revertedWith("Ownable: caller is not the owner")
-  //   })
-  // })
-  //
+  describe('calculateNextPrizePeriodStartTime()', () => {
+    it('should always sync to the last period start time', async () => {
+      let startedAt = await prizeStrategy.prizePeriodStartedAt();
+      expect(await prizeStrategy.calculateNextPrizePeriodStartTime(startedAt.add(prizePeriodSeconds * 14))).to.equal(startedAt.add(prizePeriodSeconds * 14))
+    })
+
+    it('should return the current if it is within', async () => {
+      let startedAt = await prizeStrategy.prizePeriodStartedAt();
+      expect(await prizeStrategy.calculateNextPrizePeriodStartTime(startedAt.add(prizePeriodSeconds / 2))).to.equal(startedAt)
+    })
+
+    it('should return the next if it is after', async () => {
+      let startedAt = await prizeStrategy.prizePeriodStartedAt();
+      expect(await prizeStrategy.calculateNextPrizePeriodStartTime(startedAt.add(parseInt(prizePeriodSeconds * 1.5)))).to.equal(startedAt.add(prizePeriodSeconds))
+    })
+  })
+
+  describe('setPrizePeriodSeconds()', () => {
+    it('should allow the owner to set the prize period', async () => {
+      await expect(prizeStrategy.setPrizePeriodSeconds(99))
+        .to.emit(prizeStrategy, 'PrizePeriodSecondsUpdated')
+        .withArgs(99)
+
+      expect(await prizeStrategy.prizePeriodSeconds()).to.equal(99)
+    })
+
+    it('should not allow non-owners to set the prize period', async () => {
+      await expect(prizeStrategy.connect(wallet2).setPrizePeriodSeconds(99)).to.be.revertedWith("Ownable: caller is not the owner")
+    })
+  })
+
   // describe('with a prize-period scheduled in the future', () => {
   //   let prizeStrategy2
   //
