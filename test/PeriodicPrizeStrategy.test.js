@@ -717,54 +717,51 @@ describe('PeriodicPrizeStrategy', () => {
     })
   })
 
-  // describe('completeAward()', () => {
-  //   it('should award the winner', async () => {
-  //     debug('Setting time')
-  //
-  //     await distributor.mock.distribute.withArgs('48849787646992769944319009300540211125598274780817112954146168253338351566848').returns()
-  //
-  //     await prizeStrategy.setPeriodicPrizeStrategyListener(periodicPrizeStrategyListener.address)
-  //     await periodicPrizeStrategyListener.mock.afterPrizePoolAwarded.withArgs('48849787646992769944319009300540211125598274780817112954146168253338351566848', await prizeStrategy.prizePeriodStartedAt()).returns()
-  //
-  //     // no external award
-  //     await externalERC20Award.mock.balanceOf.withArgs(prizePool.address).returns('0')
-  //
-  //     // ensure prize period is over
-  //     await prizeStrategy.setCurrentTime(await prizeStrategy.prizePeriodEndAt());
-  //
-  //     // allow an rng request
-  //     await rngFeeToken.mock.allowance.returns(0)
-  //     await rngFeeToken.mock.approve.withArgs(rng.address, toWei('1')).returns(true);
-  //     await rng.mock.requestRandomNumber.returns('1', '1')
-  //
-  //     debug('Starting award...')
-  //
-  //     // start the award
-  //     await prizeStrategy.startAward()
-  //
-  //     // rng is done
-  //     await rng.mock.isRequestComplete.returns(true)
-  //     await rng.mock.randomNumber.returns('0x6c00000000000000000000000000000000000000000000000000000000000000')
-  //
-  //     // draw winner
-  //     await ticket.mock.totalSupply.returns(toWei('10'))
-  //
-  //     // 1 dai to give
-  //     await prizePool.mock.captureAwardBalance.returns(toWei('1'))
-  //     // no reserve
-  //     await prizePool.mock.calculateReserveFee.returns('0')
-  //     await prizePool.mock.award.withArgs(wallet.address, toWei('1'), ticket.address).returns()
-  //
-  //     debug('Completing award...')
-  //
-  //     let startedAt = await prizeStrategy.prizePeriodStartedAt();
-  //
-  //     // complete the award
-  //     await prizeStrategy.completeAward()
-  //
-  //     expect(await prizeStrategy.prizePeriodStartedAt()).to.equal(startedAt.add(prizePeriodSeconds))
-  //   })
-  // })
+  describe('completeAward()', () => {
+    it('should award the winner', async () => {
+      debug('Setting time')
+
+      await distributor.mock.distribute.withArgs('48849787646992769944319009300540211125598274780817112954146168253338351566848').returns()
+
+      await prizeStrategy.setPeriodicPrizeStrategyListener(periodicPrizeStrategyListener.address)
+      await periodicPrizeStrategyListener.mock.afterPrizePoolAwarded.withArgs('48849787646992769944319009300540211125598274780817112954146168253338351566848', await prizeStrategy.prizePeriodStartedAt()).returns()
+
+      // ensure prize period is over
+      await prizeStrategy.setCurrentTime(await prizeStrategy.prizePeriodEndAt());
+
+      // allow an rng request
+      await rngFeeToken.mock.allowance.returns(0)
+      await rngFeeToken.mock.approve.withArgs(rng.address, toWei('1')).returns(true);
+      await rng.mock.requestRandomNumber.returns('1', '1')
+
+      debug('Starting award...')
+
+      // start the award
+      await prizeStrategy.startAward()
+
+      // rng is done
+      await rng.mock.isRequestComplete.returns(true)
+      await rng.mock.randomNumber.returns('0x6c00000000000000000000000000000000000000000000000000000000000000')
+
+      // draw winner
+      await ticket.mock.totalSupply.returns(toWei('10'))
+
+      // 1 dai to give
+      await prizePool.mock.captureAwardBalance.returns(toWei('1'))
+      // no reserve
+      await prizePool.mock.calculateReserveFee.returns('0')
+      await prizePool.mock.award.withArgs(wallet.address, toWei('1'), ticket.address).returns()
+
+      debug('Completing award...')
+
+      let startedAt = await prizeStrategy.prizePeriodStartedAt();
+
+      // complete the award
+      await prizeStrategy.completeAward()
+
+      expect(await prizeStrategy.prizePeriodStartedAt()).to.equal(startedAt.add(prizePeriodSeconds))
+    })
+  })
 
   describe('calculateNextPrizePeriodStartTime()', () => {
     it('should always sync to the last period start time', async () => {

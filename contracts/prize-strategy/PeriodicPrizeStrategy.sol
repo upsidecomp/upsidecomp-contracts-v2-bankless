@@ -184,7 +184,7 @@ abstract contract PeriodicPrizeStrategy is Initializable,
 
     prizesErc721.initialize();
 
-    // 30 min timeout
+    // 30 min a
     _setRngRequestTimeout(1800);
 
     emit Initialized(
