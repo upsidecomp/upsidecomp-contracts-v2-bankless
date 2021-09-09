@@ -3,7 +3,8 @@ const { call } = require('./helpers/call')
 
 const { expect } = require('chai')
 const hre = require('hardhat')
-const { AddressZero, One } = hre.ethers.constants
+const { AddressZero } = hre.ethers.constants
+const { One, Two, Three } = require("./helpers/bn")
 
 const now = () => (new Date()).getTime() / 1000 | 0
 const toWei = (val) => ethers.utils.parseEther('' + val)
@@ -338,99 +339,94 @@ describe('PeriodicPrizeStrategy', () => {
   //   })
   // })
   //
-  // describe('addExternalErc20Award()', () => {
-  //   it('should allow the owner to add external ERC20 tokens to the prize', async () => {
-  //     const externalAward = await deployMockContract(wallet2, IERC20.abi, overrides)
-  //     await externalAward.mock.totalSupply.returns(0)
-  //     await prizePool.mock.canAwardExternal.withArgs(externalAward.address).returns(true)
-  //
-  //     await expect(prizeStrategy.addExternalErc20Award(externalAward.address))
-  //       .to.emit(prizeStrategy, 'ExternalErc20AwardAdded')
-  //       .withArgs(externalAward.address)
-  //   })
-  //
-  //   it('should disallow unapproved external ERC20 prize tokens', async () => {
-  //     const invalidExternalErc20 = await deployMockContract(wallet2, IERC20.abi, overrides)
-  //     await invalidExternalErc20.mock.totalSupply.returns(0)
-  //     await prizePool.mock.canAwardExternal.withArgs(invalidExternalErc20.address).returns(false)
-  //     await expect(prizeStrategy.addExternalErc20Award(invalidExternalErc20.address))
-  //       .to.be.revertedWith('PeriodicPrizeStrategy/cannot-award-external')
-  //   })
-  //
-  //   it('should disallow added EOA accounts', async () => {
-  //     await expect(prizeStrategy.addExternalErc20Award(invalidExternalToken))
-  //       .to.be.revertedWith('PeriodicPrizeStrategy/erc20-null')
-  //   })
-  //
-  //   it('should disallow contracts that are not erc20s', async () => {
-  //     await prizePool.mock.canAwardExternal.withArgs(prizeStrategy.address).returns(true)
-  //     await expect(prizeStrategy.addExternalErc20Award(prizeStrategy.address))
-  //       .to.be.revertedWith('PeriodicPrizeStrategy/erc20-invalid')
-  //   })
-  //
-  //   it('should allow the listeners to add external erc20s', async () => {
-  //     const externalAward = await deployMockContract(wallet2, IERC20.abi, overrides)
-  //     await externalAward.mock.totalSupply.returns(0)
-  //     await prizePool.mock.canAwardExternal.withArgs(externalAward.address).returns(true)
-  //
-  //     const BeforeAwardListener = await hre.artifacts.readArtifact("BeforeAwardListener")
-  //     const beforeAwardListener = await deployMockContract(wallet, BeforeAwardListener.abi, overrides)
-  //     await prizeStrategy.forceBeforeAwardListener(beforeAwardListener.address)
-  //
-  //     await expect(beforeAwardListener.call(prizeStrategy, 'addExternalErc20Award', externalAward.address))
-  //       .to.emit(prizeStrategy, 'ExternalErc20AwardAdded')
-  //       .withArgs(externalAward.address)
-  //   })
-  // })
-  //
-  // describe('removeExternalErc20Award()', () => {
-  //   it('should only allow the owner to remove external ERC20 tokens from the prize', async () => {
-  //     await expect(prizeStrategy.removeExternalErc20Award(externalERC20Award.address, SENTINEL))
-  //       .to.emit(prizeStrategy, 'ExternalErc20AwardRemoved')
-  //       .withArgs(externalERC20Award.address)
-  //   })
-  //   it('should revert when removing non-existant external ERC20 tokens from the prize', async () => {
-  //     await expect(prizeStrategy.removeExternalErc20Award(invalidExternalToken, SENTINEL))
-  //       .to.be.revertedWith('Invalid prevAddress')
-  //   })
-  //   it('should not allow anyone else to remove external ERC20 tokens from the prize', async () => {
-  //     await expect(prizeStrategy.connect(wallet2).removeExternalErc20Award(externalERC20Award.address, SENTINEL))
-  //       .to.be.revertedWith('Ownable: caller is not the owner')
-  //   })
-  // })
-  //
-  // describe('getExternalErc721Awards()', () => {
-  //   it('should allow anyone to retrieve the list of external ERC721 tokens attached to the prize', async () => {
-  //     await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-  //     await prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1])
-  //
-  //     expect(await prizeStrategy.connect(wallet2).getExternalErc721Awards())
-  //       .to.deep.equal([externalERC721Award.address])
-  //
-  //     expect(await prizeStrategy.connect(wallet2).getExternalErc721AwardTokenIds(externalERC721Award.address))
-  //       .to.deep.equal([One])
-  //   })
-  // })
-  //
-  // describe('addExternalErc20Awards()', () => {
-  //   it('should allow the owner to add external ERC20 tokens to the prize', async () => {
-  //     const externalAward = await deployMockContract(wallet2, IERC20.abi, overrides)
-  //     const externalAward2 = await deployMockContract(wallet2, IERC20.abi, overrides)
-  //     await externalAward.mock.totalSupply.returns(0)
-  //     await externalAward2.mock.totalSupply.returns(0)
-  //     await prizePool.mock.canAwardExternal.withArgs(externalAward.address).returns(true)
-  //     await prizePool.mock.canAwardExternal.withArgs(externalAward2.address).returns(true)
-  //     await expect(prizeStrategy.addExternalErc20Awards([externalAward.address, externalAward2.address]))
-  //       .to.emit(prizeStrategy, 'ExternalErc20AwardAdded')
-  //       .withArgs(externalAward.address)
-  //   })
-  //
-  //   it('should not allow anyone else to add', async () => {
-  //     await expect(prizeStrategy.connect(wallet2).addExternalErc20Awards([externalERC20Award.address]))
-  //       .to.be.revertedWith('PeriodicPrizeStrategy/only-owner-or-listener')
-  //   })
-  // })
-  //
+
+  describe('currentPrizeAddresses()', () => {
+    describe('single ERC721 collection', () => {
+      it('should allow anyone to retrieve the list of external ERC721 tokens attached to the prize; NFT Count: 1', async () => {
+        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+        await prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1])
+
+        expect(await prizeStrategy.connect(wallet2).currentPrizeAddresses())
+          .to.deep.equal([externalERC721Award.address])
+
+        expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award.address))
+          .to.deep.equal([One])
+      })
+
+      it('should allow anyone to retrieve the list of external ERC721 tokens attached to the prize; NFT Count: more than 1', async () => {
+        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+        await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
+        await prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1, 2])
+
+        expect(await prizeStrategy.connect(wallet2).currentPrizeAddresses())
+          .to.deep.equal([externalERC721Award.address])
+
+        expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award.address))
+          .to.deep.equal([One, Two])
+      })
+    })
+
+    describe('multi ERC721 collection', () => {
+      let externalERC721Award2;
+
+      beforeEach(async () => {
+        const IERC721 = await hre.artifacts.readArtifact("IERC721Upgradeable")
+        externalERC721Award2 = await deployMockContract(wallet, IERC721.abi, overrides)
+        await externalERC721Award2.mock.supportsInterface.returns(true)
+        await externalERC721Award2.mock.supportsInterface.withArgs('0xffffffff').returns(false)
+        await prizePool.mock.canAwardExternal.withArgs(externalERC721Award2.address).returns(true)
+      })
+
+      it('should allow anyone to retrieve the list of external ERC721 tokens attached to the prize; NFT Collection Count: 2', async () => {
+        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+        await prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1])
+
+        await externalERC721Award2.mock.ownerOf.withArgs(1).returns(prizePool.address)
+        await prizeStrategy.addExternalErc721Award(externalERC721Award2.address, [1])
+
+        expect(await prizeStrategy.connect(wallet2).currentPrizeAddresses())
+          .to.deep.equal([externalERC721Award2.address, externalERC721Award.address])
+
+        expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award.address))
+          .to.deep.equal([One])
+
+        expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award2.address))
+          .to.deep.equal([One])
+      })
+
+      it('should allow anyone to retrieve the list of external ERC721 tokens attached to the prize; NFT Count: more than 1', async () => {
+        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+        await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
+        await prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1, 2])
+
+        await externalERC721Award2.mock.ownerOf.withArgs(1).returns(prizePool.address)
+        await prizeStrategy.addExternalErc721Award(externalERC721Award2.address, [1])
+
+        expect(await prizeStrategy.connect(wallet2).currentPrizeAddresses())
+          .to.deep.equal([externalERC721Award2.address, externalERC721Award.address])
+
+        expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award.address))
+          .to.deep.equal([One, Two])
+
+        expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award2.address))
+          .to.deep.equal([One])
+
+        await externalERC721Award2.mock.ownerOf.withArgs(2).returns(prizePool.address)
+        await prizeStrategy.addExternalErc721Award(externalERC721Award2.address, [2])
+
+        expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award.address))
+          .to.deep.equal([One, Two])
+
+        await externalERC721Award2.mock.ownerOf.withArgs(3).returns(prizePool.address)
+        await prizeStrategy.addExternalErc721Award(externalERC721Award2.address, [3])
+
+        expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award2.address))
+          .to.deep.equal([One, Two, Three])
+      })
+    })
+  })
+
+
   // describe('addExternalErc721Award()', () => {
   //   it('should allow the owner to add external ERC721 tokens to the prize', async () => {
   //     await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
@@ -497,7 +493,7 @@ describe('PeriodicPrizeStrategy', () => {
   //       .to.be.revertedWith('Ownable: caller is not the owner')
   //   })
   // })
-  //
+
   describe('canStartAward()', () => {
     it('should determine if a prize is able to be awarded', async () => {
       const startTime = await prizeStrategy.prizePeriodStartedAt()
