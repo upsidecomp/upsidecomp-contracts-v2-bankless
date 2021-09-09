@@ -283,62 +283,54 @@ describe('PeriodicPrizeStrategy', () => {
     })
   })
 
-  // describe("beforeTokenTransfer()", () => {
-  //   it('should not allow users to transfer tokens to themselves', async () => {
-  //     await expect(prizePool.call(
-  //       prizeStrategy,
-  //       'beforeTokenTransfer(address,address,uint256,address)',
-  //       wallet.address,
-  //       wallet.address,
-  //       toWei('10'),
-  //       wallet.address
-  //     )).to.be.revertedWith("PeriodicPrizeStrategy/transfer-to-self")
-  //   })
-  //
-  //   it('should allow other token transfers if awarding is happening', async () => {
-  //     await rngFeeToken.mock.allowance.returns(0)
-  //     await rngFeeToken.mock.approve.withArgs(rng.address, toWei('1')).returns(true);
-  //     await rng.mock.requestRandomNumber.returns('11', '1');
-  //     await prizeStrategy.setCurrentTime(await prizeStrategy.prizePeriodEndAt());
-  //     await prizeStrategy.startAward();
-  //
-  //     await prizePool.call(
-  //       prizeStrategy,
-  //       'beforeTokenTransfer(address,address,uint256,address)',
-  //       wallet.address,
-  //       wallet2.address,
-  //       toWei('10'),
-  //       wallet.address
-  //     )
-  //   })
-  //
-  //   it('should revert on ticket transfer if awarding is happening', async () => {
-  //     await rngFeeToken.mock.allowance.returns(0)
-  //     await rngFeeToken.mock.approve.withArgs(rng.address, toWei('1')).returns(true);
-  //     await rng.mock.requestRandomNumber.returns('11', '1');
-  //     await prizeStrategy.setCurrentTime(await prizeStrategy.prizePeriodEndAt());
-  //     await prizeStrategy.startAward();
-  //
-  //     await expect(
-  //       prizePool.call(
-  //         prizeStrategy,
-  //         'beforeTokenTransfer(address,address,uint256,address)',
-  //         wallet.address,
-  //         wallet2.address,
-  //         toWei('10'),
-  //         ticket.address
-  //       ))
-  //       .to.be.revertedWith('PeriodicPrizeStrategy/rng-in-flight')
-  //   })
-  // })
-  //
-  // describe('getExternalErc20Awards()', () => {
-  //   it('should allow anyone to retrieve the list of external ERC20 tokens attached to the prize', async () => {
-  //     expect(await prizeStrategy.connect(wallet2).getExternalErc20Awards())
-  //       .to.deep.equal([externalERC20Award.address])
-  //   })
-  // })
-  //
+  describe("beforeTokenTransfer()", () => {
+    it('should not allow users to transfer tokens to themselves', async () => {
+      await expect(prizePool.call(
+        prizeStrategy,
+        'beforeTokenTransfer(address,address,uint256,address)',
+        wallet.address,
+        wallet.address,
+        toWei('10'),
+        wallet.address
+      )).to.be.revertedWith("PeriodicPrizeStrategy/transfer-to-self")
+    })
+
+    it('should allow other token transfers if awarding is happening', async () => {
+      await rngFeeToken.mock.allowance.returns(0)
+      await rngFeeToken.mock.approve.withArgs(rng.address, toWei('1')).returns(true);
+      await rng.mock.requestRandomNumber.returns('11', '1');
+      await prizeStrategy.setCurrentTime(await prizeStrategy.prizePeriodEndAt());
+      await prizeStrategy.startAward();
+
+      await prizePool.call(
+        prizeStrategy,
+        'beforeTokenTransfer(address,address,uint256,address)',
+        wallet.address,
+        wallet2.address,
+        toWei('10'),
+        wallet.address
+      )
+    })
+
+    it('should revert on ticket transfer if awarding is happening', async () => {
+      await rngFeeToken.mock.allowance.returns(0)
+      await rngFeeToken.mock.approve.withArgs(rng.address, toWei('1')).returns(true);
+      await rng.mock.requestRandomNumber.returns('11', '1');
+      await prizeStrategy.setCurrentTime(await prizeStrategy.prizePeriodEndAt());
+      await prizeStrategy.startAward();
+
+      await expect(
+        prizePool.call(
+          prizeStrategy,
+          'beforeTokenTransfer(address,address,uint256,address)',
+          wallet.address,
+          wallet2.address,
+          toWei('10'),
+          ticket.address
+        ))
+        .to.be.revertedWith('PeriodicPrizeStrategy/rng-in-flight')
+    })
+  })
 
   describe('currentPrizeAddresses()', () => {
     describe('single ERC721 collection', () => {
@@ -581,55 +573,6 @@ describe('PeriodicPrizeStrategy', () => {
     })
   })
 
-  describe('removePrizeByIndex()', () => {
-    describe('flow: rewardPrizeByAwardTokenById()', () => {
-      it('should only allow the owner to remove external ERC721 tokens from the prize', async () => {
-        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-        await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
-        await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2])
-        await expect(prizeStrategy.removePrizeByIndex(externalERC721Award.address, 0))
-          .to.emit(prizeStrategy, 'PrizeAwardRemovedByIndex')
-          .withArgs(externalERC721Award.address, 1)
-      })
-
-      it('should reduce number of prizes count by 1', async () => {
-        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-        await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
-        await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2])
-        await prizeStrategy.removePrizeByIndex(externalERC721Award.address, 0)
-        expect(await prizeStrategy.numberOfPrizes()).to.equal(1)
-      })
-
-      it('should remove correct tokenId based on index', async () => {
-        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-        await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
-        await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2])
-        await prizeStrategy.removePrizeByIndex(externalERC721Award.address, 0)
-        console.log(await prizeStrategy.currentPrizeTokenIds(externalERC721Award.address))
-        expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award.address))
-              .to.deep.equal([Two])
-      })
-    })
-
-    describe('flow: rewardPrizeByAwardToken()', () => {
-      it('should only allow the owner to remove external ERC721 tokens from the prize', async () => {
-        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-        await prizeStrategy.addPrizes(externalERC721Award.address, [1])
-        await expect(prizeStrategy.removePrizeByIndex(externalERC721Award.address, 0))
-          .to.emit(prizeStrategy, 'PrizeAwardRemovedAll')
-          .withArgs(externalERC721Award.address)
-        expect(await prizeStrategy.numberOfPrizes()).to.equal(0)
-      })
-
-      it('should reduce number of prizes count by 1', async () => {
-        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-        await prizeStrategy.addPrizes(externalERC721Award.address, [1])
-        await prizeStrategy.removePrizeByIndex(externalERC721Award.address, 0)
-        expect(await prizeStrategy.numberOfPrizes()).to.equal(0)
-      })
-    })
-  })
-
   describe('canStartAward()', () => {
     it('should determine if a prize is able to be awarded', async () => {
       const startTime = await prizeStrategy.prizePeriodStartedAt()
@@ -695,60 +638,60 @@ describe('PeriodicPrizeStrategy', () => {
     })
   })
 
-  // describe('setBeforeAwardListener()', () => {
-  //   let beforeAwardListener
-  //
-  //   beforeEach(async () => {
-  //     const beforeAwardListenerStub = await hre.ethers.getContractFactory("BeforeAwardListenerStub")
-  //     beforeAwardListener = await beforeAwardListenerStub.deploy()
-  //   })
-  //
-  //   it('should allow the owner to change the listener', async () => {
-  //     await expect(prizeStrategy.setBeforeAwardListener(beforeAwardListener.address))
-  //       .to.emit(prizeStrategy, 'BeforeAwardListenerSet')
-  //       .withArgs(beforeAwardListener.address)
-  //   })
-  //
-  //   it('should not allow anyone else to set it', async () => {
-  //     await expect(prizeStrategy.connect(wallet2).setBeforeAwardListener(beforeAwardListener.address))
-  //       .to.be.revertedWith('Ownable: caller is not the owner')
-  //   })
-  //
-  //   it('should not allow setting an EOA as a listener', async () => {
-  //     await expect(prizeStrategy.setBeforeAwardListener(wallet2.address))
-  //       .to.be.revertedWith("PeriodicPrizeStrategy/beforeAwardListener-invalid");
-  //   })
-  //
-  //   it('should allow setting the listener to null', async () => {
-  //     await expect(prizeStrategy.setBeforeAwardListener(ethers.constants.AddressZero))
-  //       .to.emit(prizeStrategy, 'BeforeAwardListenerSet')
-  //       .withArgs(ethers.constants.AddressZero)
-  //   })
-  // })
-  //
-  // describe('setPeriodicPrizeStrategyListener()', () => {
-  //   it('should allow the owner to change the listener', async () => {
-  //     await expect(prizeStrategy.setPeriodicPrizeStrategyListener(periodicPrizeStrategyListener.address))
-  //       .to.emit(prizeStrategy, 'PeriodicPrizeStrategyListenerSet')
-  //       .withArgs(periodicPrizeStrategyListener.address)
-  //   })
-  //
-  //   it('should not allow anyone else to set it', async () => {
-  //     await expect(prizeStrategy.connect(wallet2).setPeriodicPrizeStrategyListener(periodicPrizeStrategyListener.address))
-  //       .to.be.revertedWith('Ownable: caller is not the owner')
-  //   })
-  //
-  //   it('should not allow setting an EOA as a listener', async () => {
-  //     await expect(prizeStrategy.setPeriodicPrizeStrategyListener(wallet2.address))
-  //       .to.be.revertedWith("PeriodicPrizeStrategy/prizeStrategyListener-invalid");
-  //   })
-  //
-  //   it('should allow setting the listener to null', async () => {
-  //     await expect(prizeStrategy.setPeriodicPrizeStrategyListener(ethers.constants.AddressZero))
-  //       .to.emit(prizeStrategy, 'PeriodicPrizeStrategyListenerSet')
-  //       .withArgs(ethers.constants.AddressZero)
-  //   })
-  // })
+  describe('setBeforeAwardListener()', () => {
+    let beforeAwardListener
+
+    beforeEach(async () => {
+      const beforeAwardListenerStub = await hre.ethers.getContractFactory("BeforeAwardListenerStub")
+      beforeAwardListener = await beforeAwardListenerStub.deploy()
+    })
+
+    it('should allow the owner to change the listener', async () => {
+      await expect(prizeStrategy.setBeforeAwardListener(beforeAwardListener.address))
+        .to.emit(prizeStrategy, 'BeforeAwardListenerSet')
+        .withArgs(beforeAwardListener.address)
+    })
+
+    it('should not allow anyone else to set it', async () => {
+      await expect(prizeStrategy.connect(wallet2).setBeforeAwardListener(beforeAwardListener.address))
+        .to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
+    it('should not allow setting an EOA as a listener', async () => {
+      await expect(prizeStrategy.setBeforeAwardListener(wallet2.address))
+        .to.be.revertedWith("PeriodicPrizeStrategy/beforeAwardListener-invalid");
+    })
+
+    it('should allow setting the listener to null', async () => {
+      await expect(prizeStrategy.setBeforeAwardListener(ethers.constants.AddressZero))
+        .to.emit(prizeStrategy, 'BeforeAwardListenerSet')
+        .withArgs(ethers.constants.AddressZero)
+    })
+  })
+
+  describe('setPeriodicPrizeStrategyListener()', () => {
+    it('should allow the owner to change the listener', async () => {
+      await expect(prizeStrategy.setPeriodicPrizeStrategyListener(periodicPrizeStrategyListener.address))
+        .to.emit(prizeStrategy, 'PeriodicPrizeStrategyListenerSet')
+        .withArgs(periodicPrizeStrategyListener.address)
+    })
+
+    it('should not allow anyone else to set it', async () => {
+      await expect(prizeStrategy.connect(wallet2).setPeriodicPrizeStrategyListener(periodicPrizeStrategyListener.address))
+        .to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
+    it('should not allow setting an EOA as a listener', async () => {
+      await expect(prizeStrategy.setPeriodicPrizeStrategyListener(wallet2.address))
+        .to.be.revertedWith("PeriodicPrizeStrategy/prizeStrategyListener-invalid");
+    })
+
+    it('should allow setting the listener to null', async () => {
+      await expect(prizeStrategy.setPeriodicPrizeStrategyListener(ethers.constants.AddressZero))
+        .to.emit(prizeStrategy, 'PeriodicPrizeStrategyListenerSet')
+        .withArgs(ethers.constants.AddressZero)
+    })
+  })
 
   describe('setTokenListener()', () => {
     it('should allow the owner to change the listener', async () => {
@@ -822,7 +765,7 @@ describe('PeriodicPrizeStrategy', () => {
   //     expect(await prizeStrategy.prizePeriodStartedAt()).to.equal(startedAt.add(prizePeriodSeconds))
   //   })
   // })
-  //
+
   describe('calculateNextPrizePeriodStartTime()', () => {
     it('should always sync to the last period start time', async () => {
       let startedAt = await prizeStrategy.prizePeriodStartedAt();

@@ -93,11 +93,6 @@ abstract contract PeriodicPrizeStrategy is Initializable,
     uint256[] tokenIds
   );
 
-  event PrizeAwardRemovedByIndex(
-    IERC721Upgradeable indexed externalErc721,
-    uint256 tokenId
-  );
-
   event PrizeAwardRemovedAll(
     IERC721Upgradeable indexed externalErc721Award
   );
@@ -542,19 +537,6 @@ abstract contract PeriodicPrizeStrategy is Initializable,
     numberOfPrizes++;
   }
 
-  function removePrizeByIndex(IERC721Upgradeable _externalErc721, uint256 _index) external onlyOwnerOrListener requireAwardNotInProgress {
-    require(prizesErc721.contains(address(_externalErc721)), "PeriodicPrizeStrategy/invalid-external-address");
-
-    uint256 length = prizesErc721TokenIds[_externalErc721].length;
-    require(_index < length, "PeriodicPrizeStrategy/index-invalid");
-
-    if (length == 1) {
-      _removePrizeByAwardTokens(_externalErc721);
-    } else {
-      _removePrizeByAwardTokenById(_externalErc721, _index);
-    }
-  }
-
   /// @notice Removes an external ERC721 token as an additional prize that can be awarded
   /// @dev Only the Prize-Strategy owner/creator can remove external tokens
   /// @param _externalErc721 The address of an ERC721 token to be removed
@@ -570,13 +552,6 @@ abstract contract PeriodicPrizeStrategy is Initializable,
   {
     prizesErc721.removeAddress(address(_prevExternalErc721), address(_externalErc721));
     _removePrizeByAwardTokens(_externalErc721);
-  }
-
-  function _removePrizeByAwardTokenById(IERC721Upgradeable _externalErc721, uint256 _index) internal {
-    uint256 tokenId = prizesErc721TokenIds[_externalErc721][_index];
-    numberOfPrizes--;
-    delete prizesErc721TokenIds[_externalErc721][_index];
-    emit PrizeAwardRemovedByIndex(_externalErc721, tokenId);
   }
 
   function _removePrizeByAwardTokens(
