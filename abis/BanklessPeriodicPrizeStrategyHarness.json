@@ -16,38 +16,6 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "contract IERC721Upgradeable",
-        "name": "externalErc721",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "tokenIds",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "ExternalErc721AwardAdded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "contract IERC721Upgradeable",
-        "name": "externalErc721Award",
-        "type": "address"
-      }
-    ],
-    "name": "ExternalErc721AwardRemoved",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": false,
         "internalType": "uint256",
         "name": "prizePeriodStart",
@@ -117,6 +85,57 @@
       }
     ],
     "name": "PeriodicPrizeStrategyListenerSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "contract IERC721Upgradeable",
+        "name": "externalErc721",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "tokenIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "PrizeAwardAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "contract IERC721Upgradeable",
+        "name": "externalErc721Award",
+        "type": "address"
+      }
+    ],
+    "name": "PrizeAwardRemovedAll",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "contract IERC721Upgradeable",
+        "name": "externalErc721",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "PrizeAwardRemovedByIndex",
     "type": "event"
   },
   {
@@ -303,7 +322,7 @@
         "type": "uint256[]"
       }
     ],
-    "name": "addExternalErc721Award",
+    "name": "addPrizes",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -733,7 +752,7 @@
         "type": "address"
       }
     ],
-    "name": "removeExternalErc721Award",
+    "name": "removePrizeAward",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

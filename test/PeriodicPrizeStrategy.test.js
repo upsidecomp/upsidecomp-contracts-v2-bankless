@@ -273,7 +273,7 @@ describe('PeriodicPrizeStrategy', () => {
   describe('currentPrizeAddresses()', () => {
     it('should return the currently accrued interest when reserve is zero', async () => {
       await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-      await prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1])
+      await prizeStrategy.addPrizes(externalERC721Award.address, [1])
 
       expect(await prizeStrategy.connect(wallet2).currentPrizeAddresses())
             .to.deep.equal([externalERC721Award.address])
@@ -344,25 +344,29 @@ describe('PeriodicPrizeStrategy', () => {
     describe('single ERC721 collection', () => {
       it('should allow anyone to retrieve the list of external ERC721 tokens attached to the prize; NFT Count: 1', async () => {
         await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-        await prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1])
+        await prizeStrategy.addPrizes(externalERC721Award.address, [1])
 
         expect(await prizeStrategy.connect(wallet2).currentPrizeAddresses())
           .to.deep.equal([externalERC721Award.address])
 
         expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award.address))
           .to.deep.equal([One])
+
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(1)
       })
 
       it('should allow anyone to retrieve the list of external ERC721 tokens attached to the prize; NFT Count: more than 1', async () => {
         await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
         await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
-        await prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1, 2])
+        await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2])
 
         expect(await prizeStrategy.connect(wallet2).currentPrizeAddresses())
           .to.deep.equal([externalERC721Award.address])
 
         expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award.address))
           .to.deep.equal([One, Two])
+
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(2)
       })
     })
 
@@ -379,10 +383,10 @@ describe('PeriodicPrizeStrategy', () => {
 
       it('should allow anyone to retrieve the list of external ERC721 tokens attached to the prize; NFT Collection Count: 2', async () => {
         await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-        await prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1])
+        await prizeStrategy.addPrizes(externalERC721Award.address, [1])
 
         await externalERC721Award2.mock.ownerOf.withArgs(1).returns(prizePool.address)
-        await prizeStrategy.addExternalErc721Award(externalERC721Award2.address, [1])
+        await prizeStrategy.addPrizes(externalERC721Award2.address, [1])
 
         expect(await prizeStrategy.connect(wallet2).currentPrizeAddresses())
           .to.deep.equal([externalERC721Award2.address, externalERC721Award.address])
@@ -392,15 +396,17 @@ describe('PeriodicPrizeStrategy', () => {
 
         expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award2.address))
           .to.deep.equal([One])
+
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(2)
       })
 
       it('should allow anyone to retrieve the list of external ERC721 tokens attached to the prize; NFT Count: more than 1', async () => {
         await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
         await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
-        await prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1, 2])
+        await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2])
 
         await externalERC721Award2.mock.ownerOf.withArgs(1).returns(prizePool.address)
-        await prizeStrategy.addExternalErc721Award(externalERC721Award2.address, [1])
+        await prizeStrategy.addPrizes(externalERC721Award2.address, [1])
 
         expect(await prizeStrategy.connect(wallet2).currentPrizeAddresses())
           .to.deep.equal([externalERC721Award2.address, externalERC721Award.address])
@@ -411,88 +417,218 @@ describe('PeriodicPrizeStrategy', () => {
         expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award2.address))
           .to.deep.equal([One])
 
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(3)
+
         await externalERC721Award2.mock.ownerOf.withArgs(2).returns(prizePool.address)
-        await prizeStrategy.addExternalErc721Award(externalERC721Award2.address, [2])
+        await prizeStrategy.addPrizes(externalERC721Award2.address, [2])
 
         expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award.address))
           .to.deep.equal([One, Two])
 
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(4)
+
         await externalERC721Award2.mock.ownerOf.withArgs(3).returns(prizePool.address)
-        await prizeStrategy.addExternalErc721Award(externalERC721Award2.address, [3])
+        await prizeStrategy.addPrizes(externalERC721Award2.address, [3])
 
         expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award2.address))
           .to.deep.equal([One, Two, Three])
+
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(5)
       })
     })
   })
 
+  describe('addPrizes()', () => {
+    it('should allow the owner to add external ERC721 tokens to the prize', async () => {
+      await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+      await expect(prizeStrategy.addPrizes(externalERC721Award.address, [1]))
+        .to.emit(prizeStrategy, 'PrizeAwardAdded')
+        .withArgs(externalERC721Award.address, [1])
+      expect(await prizeStrategy.numberOfPrizes()).to.equal(1)
+    })
 
-  // describe('addExternalErc721Award()', () => {
-  //   it('should allow the owner to add external ERC721 tokens to the prize', async () => {
-  //     await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-  //     await expect(prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1]))
-  //       .to.emit(prizeStrategy, 'ExternalErc721AwardAdded')
-  //       .withArgs(externalERC721Award.address, [1])
-  //   })
-  //
-  //   it('should allow adding multiple erc721s to the prize', async () => {
-  //     await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-  //     await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
-  //     await expect(prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1]))
-  //       .to.emit(prizeStrategy, 'ExternalErc721AwardAdded')
-  //       .withArgs(externalERC721Award.address, [1])
-  //     await expect(prizeStrategy.addExternalErc721Award(externalERC721Award.address, [2]))
-  //       .to.emit(prizeStrategy, 'ExternalErc721AwardAdded')
-  //       .withArgs(externalERC721Award.address, [2])
-  //   })
-  //
-  //   it('should disallow unapproved external ERC721 prize tokens', async () => {
-  //     await prizePool.mock.canAwardExternal.withArgs(invalidExternalToken).returns(false)
-  //     await expect(prizeStrategy.addExternalErc721Award(invalidExternalToken, [1]))
-  //       .to.be.revertedWith('PeriodicPrizeStrategy/cannot-award-external')
-  //   })
-  //
-  //   it('should disallow ERC721 tokens that are not held by the Prize Pool', async () => {
-  //     await externalERC721Award.mock.ownerOf.withArgs(1).returns(wallet.address)
-  //     await expect(prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1]))
-  //       .to.be.revertedWith('PeriodicPrizeStrategy/unavailable-token')
-  //   })
-  //
-  //   it('should disallow anyone but the owner or listener', async () => {
-  //     await expect(prizeStrategy.connect(wallet2).addExternalErc721Award(externalERC721Award.address, [1]))
-  //       .to.be.revertedWith('PeriodicPrizeStrategy/only-owner-or-listener')
-  //   })
-  //
-  //   it('should not allow someone to add a token twice', async () => {
-  //     await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-  //     await expect(prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1, 1]))
-  //       .to.be.revertedWith('PeriodicPrizeStrategy/erc721-duplicate')
-  //   })
-  //
-  //   it('should not allow someone to add a non-ERC721 contract', async () => {
-  //     await prizePool.mock.canAwardExternal.withArgs(prizePool.address).returns(true)
-  //     await expect(prizeStrategy.addExternalErc721Award(prizePool.address, [1]))
-  //       .to.be.revertedWith('PeriodicPrizeStrategy/erc721-invalid')
-  //   })
-  // })
-  //
-  // describe('removeExternalErc721Award()', () => {
-  //   it('should only allow the owner to remove external ERC721 tokens from the prize', async () => {
-  //     await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-  //     await prizeStrategy.addExternalErc721Award(externalERC721Award.address, [1])
-  //     await expect(prizeStrategy.removeExternalErc721Award(externalERC721Award.address, SENTINEL))
-  //       .to.emit(prizeStrategy, 'ExternalErc721AwardRemoved')
-  //       .withArgs(externalERC721Award.address)
-  //   })
-  //   it('should revert when removing non-existant external ERC721 tokens from the prize', async () => {
-  //     await expect(prizeStrategy.removeExternalErc721Award(invalidExternalToken, SENTINEL))
-  //       .to.be.revertedWith('Invalid prevAddress')
-  //   })
-  //   it('should not allow anyone else to remove external ERC721 tokens from the prize', async () => {
-  //     await expect(prizeStrategy.connect(wallet2).removeExternalErc721Award(externalERC721Award.address, SENTINEL))
-  //       .to.be.revertedWith('Ownable: caller is not the owner')
-  //   })
-  // })
+    it('should allow adding multiple erc721s to the prize', async () => {
+      await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+      await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
+      await expect(prizeStrategy.addPrizes(externalERC721Award.address, [1]))
+        .to.emit(prizeStrategy, 'PrizeAwardAdded')
+        .withArgs(externalERC721Award.address, [1])
+      await expect(prizeStrategy.addPrizes(externalERC721Award.address, [2]))
+        .to.emit(prizeStrategy, 'PrizeAwardAdded')
+        .withArgs(externalERC721Award.address, [2])
+      expect(await prizeStrategy.numberOfPrizes()).to.equal(2)
+    })
+
+    it('should disallow unapproved external ERC721 prize tokens', async () => {
+      await prizePool.mock.canAwardExternal.withArgs(invalidExternalToken).returns(false)
+      await expect(prizeStrategy.addPrizes(invalidExternalToken, [1]))
+        .to.be.revertedWith('PeriodicPrizeStrategy/cannot-award-external')
+      expect(await prizeStrategy.numberOfPrizes()).to.equal(0)
+    })
+
+    it('should disallow ERC721 tokens that are not held by the Prize Pool', async () => {
+      await externalERC721Award.mock.ownerOf.withArgs(1).returns(wallet.address)
+      await expect(prizeStrategy.addPrizes(externalERC721Award.address, [1]))
+        .to.be.revertedWith('PeriodicPrizeStrategy/unavailable-token')
+    })
+
+    it('should disallow anyone but the owner or listener', async () => {
+      await expect(prizeStrategy.connect(wallet2).addPrizes(externalERC721Award.address, [1]))
+        .to.be.revertedWith('PeriodicPrizeStrategy/only-owner-or-listener')
+      expect(await prizeStrategy.numberOfPrizes()).to.equal(0)
+    })
+
+    it('should not allow someone to add a token twice', async () => {
+      await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+      await expect(prizeStrategy.addPrizes(externalERC721Award.address, [1, 1]))
+        .to.be.revertedWith('PeriodicPrizeStrategy/erc721-duplicate')
+      expect(await prizeStrategy.numberOfPrizes()).to.equal(0)
+    })
+
+    it('should not allow someone to add a token that already exists', async () => {
+      await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+      prizeStrategy.addPrizes(externalERC721Award.address, [1])
+
+      await expect(prizeStrategy.addPrizes(externalERC721Award.address, [1]))
+        .to.be.revertedWith('PeriodicPrizeStrategy/erc721-duplicate')
+
+      expect(await prizeStrategy.numberOfPrizes()).to.equal(1)
+    })
+
+    it('should not allow someone to add a non-ERC721 contract', async () => {
+      await prizePool.mock.canAwardExternal.withArgs(prizePool.address).returns(true)
+      await expect(prizeStrategy.addPrizes(prizePool.address, [1]))
+        .to.be.revertedWith('PeriodicPrizeStrategy/erc721-invalid')
+    expect(await prizeStrategy.numberOfPrizes()).to.equal(0)
+    })
+  })
+
+  describe('removePrizeAward()', () => {
+    it('should only allow the owner to remove external ERC721 tokens from the prize', async () => {
+      await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+      await prizeStrategy.addPrizes(externalERC721Award.address, [1])
+      await expect(prizeStrategy.removePrizeAward(externalERC721Award.address, SENTINEL))
+        .to.emit(prizeStrategy, 'PrizeAwardRemovedAll')
+        .withArgs(externalERC721Award.address)
+    })
+
+    it('should reduce the number of prizes count', async () => {
+      await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+      await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
+      await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2])
+      expect(await prizeStrategy.numberOfPrizes()).to.equal(2)
+      await expect(prizeStrategy.removePrizeAward(externalERC721Award.address, SENTINEL))
+        .to.emit(prizeStrategy, 'PrizeAwardRemovedAll')
+        .withArgs(externalERC721Award.address)
+      expect(await prizeStrategy.numberOfPrizes()).to.equal(0)
+    })
+
+    it('should revert when removing non-existant external ERC721 tokens from the prize', async () => {
+      await expect(prizeStrategy.removePrizeAward(invalidExternalToken, SENTINEL))
+        .to.be.revertedWith('Invalid prevAddress')
+    })
+    it('should not allow anyone else to remove external ERC721 tokens from the prize', async () => {
+      await expect(prizeStrategy.connect(wallet2).removePrizeAward(externalERC721Award.address, SENTINEL))
+        .to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
+    describe("multiple erc721 collection", () => {
+      let externalERC721Award2;
+
+      beforeEach(async () => {
+        const IERC721 = await hre.artifacts.readArtifact("IERC721Upgradeable")
+        externalERC721Award2 = await deployMockContract(wallet, IERC721.abi, overrides)
+        await externalERC721Award2.mock.supportsInterface.returns(true)
+        await externalERC721Award2.mock.supportsInterface.withArgs('0xffffffff').returns(false)
+        await prizePool.mock.canAwardExternal.withArgs(externalERC721Award2.address).returns(true)
+
+        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+        await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
+        await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2])
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(2)
+
+        await externalERC721Award2.mock.ownerOf.withArgs(1).returns(prizePool.address)
+        await externalERC721Award2.mock.ownerOf.withArgs(2).returns(prizePool.address)
+        await prizeStrategy.addPrizes(externalERC721Award2.address, [1, 2])
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(4)
+      });
+
+      it("should remove from one collection", async () => {
+        await expect(prizeStrategy.removePrizeAward(externalERC721Award2.address, SENTINEL))
+          .to.emit(prizeStrategy, 'PrizeAwardRemovedAll')
+          .withArgs(externalERC721Award2.address)
+      })
+
+      it("should remove from all collections", async () => {
+        await expect(prizeStrategy.removePrizeAward(externalERC721Award2.address, SENTINEL))
+          .to.emit(prizeStrategy, 'PrizeAwardRemovedAll')
+          .withArgs(externalERC721Award2.address)
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(2)
+
+        await expect(prizeStrategy.removePrizeAward(externalERC721Award.address, SENTINEL))
+          .to.emit(prizeStrategy, 'PrizeAwardRemovedAll')
+          .withArgs(externalERC721Award.address)
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(0)
+      })
+
+      it("should not allow removal twice from same collection", async () => {
+        prizeStrategy.removePrizeAward(externalERC721Award2.address, SENTINEL)
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(2)
+        await expect(prizeStrategy.removePrizeAward(externalERC721Award2.address, SENTINEL))
+          .to.be.revertedWith(prizeStrategy, 'prevAddress')
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(2)
+      })
+    })
+  })
+
+  describe('removePrizeByIndex()', () => {
+    describe('flow: rewardPrizeByAwardTokenById()', () => {
+      it('should only allow the owner to remove external ERC721 tokens from the prize', async () => {
+        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+        await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
+        await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2])
+        await expect(prizeStrategy.removePrizeByIndex(externalERC721Award.address, 0))
+          .to.emit(prizeStrategy, 'PrizeAwardRemovedByIndex')
+          .withArgs(externalERC721Award.address, 1)
+      })
+
+      it('should reduce number of prizes count by 1', async () => {
+        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+        await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
+        await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2])
+        await prizeStrategy.removePrizeByIndex(externalERC721Award.address, 0)
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(1)
+      })
+
+      it('should remove correct tokenId based on index', async () => {
+        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+        await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
+        await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2])
+        await prizeStrategy.removePrizeByIndex(externalERC721Award.address, 0)
+        console.log(await prizeStrategy.currentPrizeTokenIds(externalERC721Award.address))
+        expect(await prizeStrategy.connect(wallet2).currentPrizeTokenIds(externalERC721Award.address))
+              .to.deep.equal([Two])
+      })
+    })
+
+    describe('flow: rewardPrizeByAwardToken()', () => {
+      it('should only allow the owner to remove external ERC721 tokens from the prize', async () => {
+        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+        await prizeStrategy.addPrizes(externalERC721Award.address, [1])
+        await expect(prizeStrategy.removePrizeByIndex(externalERC721Award.address, 0))
+          .to.emit(prizeStrategy, 'PrizeAwardRemovedAll')
+          .withArgs(externalERC721Award.address)
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(0)
+      })
+
+      it('should reduce number of prizes count by 1', async () => {
+        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+        await prizeStrategy.addPrizes(externalERC721Award.address, [1])
+        await prizeStrategy.removePrizeByIndex(externalERC721Award.address, 0)
+        expect(await prizeStrategy.numberOfPrizes()).to.equal(0)
+      })
+    })
+  })
 
   describe('canStartAward()', () => {
     it('should determine if a prize is able to be awarded', async () => {
@@ -718,44 +854,42 @@ describe('PeriodicPrizeStrategy', () => {
     })
   })
 
-  // describe('with a prize-period scheduled in the future', () => {
-  //   let prizeStrategy2
-  //
-  //   beforeEach(async () => {
-  //     prizePeriodStart = 10000
-  //
-  //     debug('deploying secondary prizeStrategy...')
-  //     const PeriodicPrizeStrategyHarness =  await hre.ethers.getContractFactory("PeriodicPrizeStrategyHarness", wallet, overrides)
-  //
-  //     prizeStrategy2 = await PeriodicPrizeStrategyHarness.deploy()
-  //
-  //     debug('initializing secondary prizeStrategy...')
-  //     await prizeStrategy2.initialize(
-  //       prizePeriodStart,
-  //       prizePeriodSeconds,
-  //       prizePool.address,
-  //       ticket.address,
-  //       sponsorship.address,
-  //       rng.address,
-  //       []
-  //     )
-  //
-  //     debug('initialized!')
-  //   })
-  //
-  //   describe('startAward()', () => {
-  //     it('should prevent starting an award', async () => {
-  //       await prizeStrategy2.setCurrentTime(100);
-  //       await expect(prizeStrategy2.startAward()).to.be.revertedWith('PeriodicPrizeStrategy/prize-period-not-over')
-  //     })
-  //   })
-  //
-  //   describe('completeAward()', () => {
-  //     it('should prevent completing an award', async () => {
-  //       await prizeStrategy2.setCurrentTime(100);
-  //       await expect(prizeStrategy2.startAward()).to.be.revertedWith('PeriodicPrizeStrategy/prize-period-not-over')
-  //     })
-  //   })
-  //
-  // })
+  describe('with a prize-period scheduled in the future', () => {
+    let prizeStrategy2
+
+    beforeEach(async () => {
+      prizePeriodStart = 10000
+
+      debug('deploying secondary prizeStrategy...')
+      const PeriodicPrizeStrategyHarness =  await hre.ethers.getContractFactory("BanklessPeriodicPrizeStrategyHarness", wallet, overrides)
+
+      prizeStrategy2 = await PeriodicPrizeStrategyHarness.deploy()
+
+      debug('initializing secondary prizeStrategy...')
+      await prizeStrategy2.initialize(
+        prizePeriodStart,
+        prizePeriodSeconds,
+        prizePool.address,
+        ticket.address,
+        sponsorship.address,
+        rng.address,
+      )
+
+      debug('initialized!')
+    })
+
+    describe('startAward()', () => {
+      it('should prevent starting an award', async () => {
+        await prizeStrategy2.setCurrentTime(100);
+        await expect(prizeStrategy2.startAward()).to.be.revertedWith('PeriodicPrizeStrategy/prize-period-not-over')
+      })
+    })
+
+    describe('completeAward()', () => {
+      it('should prevent completing an award', async () => {
+        await prizeStrategy2.setCurrentTime(100);
+        await expect(prizeStrategy2.startAward()).to.be.revertedWith('PeriodicPrizeStrategy/prize-period-not-over')
+      })
+    })
+  })
 })

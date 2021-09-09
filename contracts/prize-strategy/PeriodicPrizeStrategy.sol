@@ -88,12 +88,17 @@ abstract contract PeriodicPrizeStrategy is Initializable,
     PeriodicPrizeStrategyListenerInterface indexed periodicPrizeStrategyListener
   );
 
-  event ExternalErc721AwardAdded(
+  event PrizeAwardAdded(
     IERC721Upgradeable indexed externalErc721,
     uint256[] tokenIds
   );
 
-  event ExternalErc721AwardRemoved(
+  event PrizeAwardRemovedByIndex(
+    IERC721Upgradeable indexed externalErc721,
+    uint256 tokenId
+  );
+
+  event PrizeAwardRemovedAll(
     IERC721Upgradeable indexed externalErc721Award
   );
 
@@ -278,7 +283,7 @@ abstract contract PeriodicPrizeStrategy is Initializable,
               j++;
         }
       }
-      _removeExternalErc721AwardTokens(IERC721Upgradeable(currentToken));
+      _removePrizeByAwardTokens(IERC721Upgradeable(currentToken));
       currentToken = prizesErc721.next(currentToken);
     }
     prizesErc721.clearAll();
@@ -511,7 +516,7 @@ abstract contract PeriodicPrizeStrategy is Initializable,
   /// NOTE: The NFT must already be owned by the Prize-Pool
   /// @param _externalErc721 The address of an ERC721 token to be awarded
   /// @param _tokenIds An array of token IDs of the ERC721 to be awarded
-  function addExternalErc721Award(IERC721Upgradeable _externalErc721, uint256[] calldata _tokenIds) external onlyOwnerOrListener requireAwardNotInProgress {
+  function addPrizes(IERC721Upgradeable _externalErc721, uint256[] calldata _tokenIds) external onlyOwnerOrListener requireAwardNotInProgress {
     require(prizePool.canAwardExternal(address(_externalErc721)), "PeriodicPrizeStrategy/cannot-award-external");
     require(address(_externalErc721).supportsInterface(Constants.ERC165_INTERFACE_ID_ERC721), "PeriodicPrizeStrategy/erc721-invalid");
 
@@ -520,13 +525,13 @@ abstract contract PeriodicPrizeStrategy is Initializable,
     }
 
     for (uint256 i = 0; i < _tokenIds.length; i++) {
-      _addExternalErc721Award(_externalErc721, _tokenIds[i]);
+      _addPrizes(_externalErc721, _tokenIds[i]);
     }
 
-    emit ExternalErc721AwardAdded(_externalErc721, _tokenIds);
+    emit PrizeAwardAdded(_externalErc721, _tokenIds);
   }
 
-  function _addExternalErc721Award(IERC721Upgradeable _externalErc721, uint256 _tokenId) internal {
+  function _addPrizes(IERC721Upgradeable _externalErc721, uint256 _tokenId) internal {
     require(IERC721Upgradeable(_externalErc721).ownerOf(_tokenId) == address(prizePool), "PeriodicPrizeStrategy/unavailable-token");
     for (uint256 i = 0; i < prizesErc721TokenIds[_externalErc721].length; i++) {
       if (prizesErc721TokenIds[_externalErc721][i] == _tokenId) {
@@ -537,12 +542,25 @@ abstract contract PeriodicPrizeStrategy is Initializable,
     numberOfPrizes++;
   }
 
+  function removePrizeByIndex(IERC721Upgradeable _externalErc721, uint256 _index) external onlyOwnerOrListener requireAwardNotInProgress {
+    require(prizesErc721.contains(address(_externalErc721)), "PeriodicPrizeStrategy/invalid-external-address");
+
+    uint256 length = prizesErc721TokenIds[_externalErc721].length;
+    require(_index < length, "PeriodicPrizeStrategy/index-invalid");
+
+    if (length == 1) {
+      _removePrizeByAwardTokens(_externalErc721);
+    } else {
+      _removePrizeByAwardTokenById(_externalErc721, _index);
+    }
+  }
+
   /// @notice Removes an external ERC721 token as an additional prize that can be awarded
   /// @dev Only the Prize-Strategy owner/creator can remove external tokens
   /// @param _externalErc721 The address of an ERC721 token to be removed
   /// @param _prevExternalErc721 The address of the previous ERC721 token in the list.
   /// If no previous, then pass the SENTINEL address: 0x0000000000000000000000000000000000000001
-  function removeExternalErc721Award(
+  function removePrizeAward(
     IERC721Upgradeable _externalErc721,
     IERC721Upgradeable _prevExternalErc721
   )
@@ -551,16 +569,24 @@ abstract contract PeriodicPrizeStrategy is Initializable,
     requireAwardNotInProgress
   {
     prizesErc721.removeAddress(address(_prevExternalErc721), address(_externalErc721));
-    _removeExternalErc721AwardTokens(_externalErc721);
+    _removePrizeByAwardTokens(_externalErc721);
   }
 
-  function _removeExternalErc721AwardTokens(
+  function _removePrizeByAwardTokenById(IERC721Upgradeable _externalErc721, uint256 _index) internal {
+    uint256 tokenId = prizesErc721TokenIds[_externalErc721][_index];
+    numberOfPrizes--;
+    delete prizesErc721TokenIds[_externalErc721][_index];
+    emit PrizeAwardRemovedByIndex(_externalErc721, tokenId);
+  }
+
+  function _removePrizeByAwardTokens(
     IERC721Upgradeable _externalErc721
   )
     internal
   {
+    numberOfPrizes = numberOfPrizes - prizesErc721TokenIds[_externalErc721].length;
     delete prizesErc721TokenIds[_externalErc721];
-    emit ExternalErc721AwardRemoved(_externalErc721);
+    emit PrizeAwardRemovedAll(_externalErc721);
   }
 
   function _requireAwardNotInProgress() internal view {
