@@ -13,7 +13,7 @@
     "start": "echo 'Starting node for local testing....\n'; rm -rf deployments/localhost_31337; DISABLE_HARNESS=true hardhat node",
     "start-gas": "echo 'Starting node for gas testing....\n'; rm -rf deployments/localhost_31337; DISABLE_HARNESS=true hardhat node",
     "deploy": "hardhat deploy --write true --network",
-    "run:test-pool": "hardhat run ./js/deployTestPool.js --network",
+    "deploy:pool": "hardhat run ./js/pool/createBANKPool.js --network",
     "clean": "rm -rf abis artifacts build .build-openzeppelin cache coverage coverage.json test-results.xml .cache-openzeppelin deployments/localhost deployments/localhost_*; mkdir abis",
     "prepack": "yarn clean && yarn compile",
     "postpublish": "PACKAGE_VERSION=$(./scripts/package-version.sh) && git tag -ae v$PACKAGE_VERSION && git push --tags"

@@ -22,4 +22,7 @@ contract BanklessMultipleWinnersHarness is BanklessMultipleWinners {
     _distribute(randomNumber);
   }
 
+  function awardPrizes(address[] memory winners) external {
+    _awardPrizes(winners);
+  }
 }

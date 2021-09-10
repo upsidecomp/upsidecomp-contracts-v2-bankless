@@ -64,7 +64,6 @@ module.exports = async (hardhat) => {
     admin,
     sablier,
     reserveRegistry,
-    testnetBank
   } = await getNamedAccounts()
   const chainId = parseInt(await getChainId(), 10)
   // 31337 is unit testing, 1337 is for coverage
@@ -85,7 +84,19 @@ module.exports = async (hardhat) => {
 
   await deploy1820(signer)
 
-  let bankAddress = testnetBank
+  cyan("\nDeploying Bank...")
+  const bankResult = await deploy("Bank", {
+    args: [
+      admin,
+      admin
+    ],
+    contract: 'Bank',
+    from: deployer,
+    skipIfAlreadyDeployed: false
+  })
+  let bankAddress = bankResult.address
+  dim("  - Bank:             ", bankResult.address)
+
   if (isTestEnvironment) {
     cyan("\nDeploying RNGService...")
     const rngServiceMockResult = await deploy("RNGServiceMock", {
@@ -93,18 +104,6 @@ module.exports = async (hardhat) => {
       skipIfAlreadyDeployed: false
     })
     rng = rngServiceMockResult.address
-
-    cyan("\nDeploying Bank...")
-    const bankResult = await deploy("Bank", {
-      args: [
-        admin,
-        admin
-      ],
-      contract: 'Bank',
-      from: deployer,
-      skipIfAlreadyDeployed: false
-    })
-    bankAddress = bankResult.address
 
     // todo: remove
     const daiResult = await deploy("Dai", {
@@ -120,7 +119,6 @@ module.exports = async (hardhat) => {
     // Display Contract Addresses
     dim("\nLocal Contract Deployments;\n")
     dim("  - RNGService:       ", rng)
-    dim("  - Bank:             ", bankResult.address)
   }
 
   cyan(`\nDeploying ReserveRegistry...`)

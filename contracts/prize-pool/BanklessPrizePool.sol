@@ -6,30 +6,25 @@ pragma experimental ABIEncoderV2;
 import "@pooltogether/pooltogether-contracts/contracts/prize-pool/stake/StakePrizePool.sol";
 
 contract BanklessPrizePool is StakePrizePool {
-    function award(
+  event DistributedAward(address indexed to, address indexed externalToken, uint256 externalTokenId);
+
+  function awardPrize(
     address to,
     address externalToken,
-    uint256[] calldata tokenIds
+    uint256 tokenId
   )
     external
     onlyPrizeStrategy
   {
     require(_canAwardExternal(externalToken), "BanklessPrizePool/invalid-external-token");
 
-    if (tokenIds.length == 0) {
-      return;
-    }
-
-    for (uint256 i = 0; i < tokenIds.length; i++) {
-      try IERC721Upgradeable(externalToken).safeTransferFrom(address(this), to, tokenIds[i]){
-
-      }
-      catch(bytes memory error){
-        emit ErrorAwardingExternalERC721(error);
-      }
+    try IERC721Upgradeable(externalToken).safeTransferFrom(address(this), to, tokenId){
 
     }
+    catch(bytes memory error){
+      emit ErrorAwardingExternalERC721(error);
+    }
 
-    emit AwardedExternalERC721(to, externalToken, tokenIds);
+    emit DistributedAward(to, externalToken, tokenId);
   }
 }

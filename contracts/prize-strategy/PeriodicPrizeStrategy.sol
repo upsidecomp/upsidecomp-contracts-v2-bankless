@@ -88,12 +88,12 @@ abstract contract PeriodicPrizeStrategy is Initializable,
     PeriodicPrizeStrategyListenerInterface indexed periodicPrizeStrategyListener
   );
 
-  event ExternalErc721AwardAdded(
+  event PrizeAwardAdded(
     IERC721Upgradeable indexed externalErc721,
     uint256[] tokenIds
   );
 
-  event ExternalErc721AwardRemoved(
+  event PrizeAwardRemovedAll(
     IERC721Upgradeable indexed externalErc721Award
   );
 
@@ -136,11 +136,14 @@ abstract contract PeriodicPrizeStrategy is Initializable,
   uint256 public prizePeriodStartedAt;
 
   // External tokens awarded as part of prize
-  MappedSinglyLinkedList.Mapping internal externalErc721s;
+  MappedSinglyLinkedList.Mapping internal prizesErc721;
 
   // External NFT token IDs to be awarded
-  //   NFT Address => TokenIds
-  mapping (IERC721Upgradeable => uint256[]) internal externalErc721TokenIds;
+  //    NFT Address => TokenIds
+  mapping (IERC721Upgradeable => uint256[]) internal prizesErc721TokenIds;
+
+  // Number of Prizes
+  uint256 public numberOfPrizes;
 
   /// @notice A listener that is called before the prize is awarded
   BeforeAwardListenerInterface public beforeAwardListener;
@@ -174,14 +177,14 @@ abstract contract PeriodicPrizeStrategy is Initializable,
     _setPrizePeriodSeconds(_prizePeriodSeconds);
 
     __Ownable_init();
-    Constants.REGISTRY.setInterfaceImplementer(address(this), Constants.TOKENS_RECIPIENT_INTERFACE_HASH, address(this));
 
     prizePeriodSeconds = _prizePeriodSeconds;
     prizePeriodStartedAt = _prizePeriodStart;
+    numberOfPrizes = 0;
 
-    externalErc721s.initialize();
+    prizesErc721.initialize();
 
-    // 30 min timeout
+    // 30 min a
     _setRngRequestTimeout(1800);
 
     emit Initialized(
@@ -199,12 +202,14 @@ abstract contract PeriodicPrizeStrategy is Initializable,
 
   /// @notice Calculates and returns the currently accrued prize
   /// @return The current prize size
-  function currentPrize() public view returns (address[] memory) {
-    return externalErc721s.addressArray();
+  function currentPrizeAddresses() public view returns (address[] memory) {
+    return prizesErc721.addressArray();
   }
 
+  // @notice Finds the token IDs of the prizes
+  // @return All associates tokenIds to a erc721 contract
   function currentPrizeTokenIds(IERC721Upgradeable _externalErc721) external view returns (uint256[] memory) {
-    return externalErc721TokenIds[_externalErc721];
+    return prizesErc721TokenIds[_externalErc721];
   }
 
   /// @notice Allows the owner to set the token listener
@@ -256,21 +261,31 @@ abstract contract PeriodicPrizeStrategy is Initializable,
     return _currentTime() >= _prizePeriodEndAt();
   }
 
+
   /// @notice Awards all external ERC721 tokens to the given user.
   /// The external tokens must be held by the PrizePool contract.
   /// @dev The list of ERC721s is reset after every award
-  /// @param winner The user to transfer the tokens to
-  function _awardPrize(address winner) internal {
-    address currentToken = externalErc721s.start();
-    while (currentToken != address(0) && currentToken != externalErc721s.end()) {
+  /// @param winners The users to transfer the tokens to
+  function _awardPrizes(address[] memory winners) internal {
+    require(winners.length == numberOfPrizes, "PeriodicPrizeStrategy/wrong-winner-count");
+    address currentToken = prizesErc721.start();
+    uint256 j = 0;
+    while (currentToken != address(0) && currentToken != prizesErc721.end()) {
       uint256 balance = IERC721Upgradeable(currentToken).balanceOf(address(prizePool));
       if (balance > 0) {
-        prizePool.award(winner, currentToken, externalErc721TokenIds[IERC721Upgradeable(currentToken)]);
-        _removeExternalErc721AwardTokens(IERC721Upgradeable(currentToken));
+        for (uint256 i = 0; i < balance; i++) {
+              prizePool.awardPrize(winners[j], currentToken, prizesErc721TokenIds[IERC721Upgradeable(currentToken)][i]);
+              j++;
+              // if (j++ >= numberOfWinners) {
+              // j = j.sub(numberOfWinners);
+              // }
+        }
       }
-      currentToken = externalErc721s.next(currentToken);
+      _removePrizeByAwardTokens(IERC721Upgradeable(currentToken));
+      currentToken = prizesErc721.next(currentToken);
     }
-    externalErc721s.clearAll();
+    prizesErc721.clearAll();
+    numberOfPrizes = 0;
   }
 
   /// @notice Returns the timestamp at which the prize period ends
@@ -499,29 +514,30 @@ abstract contract PeriodicPrizeStrategy is Initializable,
   /// NOTE: The NFT must already be owned by the Prize-Pool
   /// @param _externalErc721 The address of an ERC721 token to be awarded
   /// @param _tokenIds An array of token IDs of the ERC721 to be awarded
-  function addExternalErc721Award(IERC721Upgradeable _externalErc721, uint256[] calldata _tokenIds) external onlyOwnerOrListener requireAwardNotInProgress {
+  function addPrizes(IERC721Upgradeable _externalErc721, uint256[] calldata _tokenIds) external onlyOwnerOrListener requireAwardNotInProgress {
     require(prizePool.canAwardExternal(address(_externalErc721)), "PeriodicPrizeStrategy/cannot-award-external");
     require(address(_externalErc721).supportsInterface(Constants.ERC165_INTERFACE_ID_ERC721), "PeriodicPrizeStrategy/erc721-invalid");
 
-    if (!externalErc721s.contains(address(_externalErc721))) {
-      externalErc721s.addAddress(address(_externalErc721));
+    if (!prizesErc721.contains(address(_externalErc721))) {
+      prizesErc721.addAddress(address(_externalErc721));
     }
 
     for (uint256 i = 0; i < _tokenIds.length; i++) {
-      _addExternalErc721Award(_externalErc721, _tokenIds[i]);
+      _addPrizes(_externalErc721, _tokenIds[i]);
     }
 
-    emit ExternalErc721AwardAdded(_externalErc721, _tokenIds);
+    emit PrizeAwardAdded(_externalErc721, _tokenIds);
   }
 
-  function _addExternalErc721Award(IERC721Upgradeable _externalErc721, uint256 _tokenId) internal {
+  function _addPrizes(IERC721Upgradeable _externalErc721, uint256 _tokenId) internal {
     require(IERC721Upgradeable(_externalErc721).ownerOf(_tokenId) == address(prizePool), "PeriodicPrizeStrategy/unavailable-token");
-    for (uint256 i = 0; i < externalErc721TokenIds[_externalErc721].length; i++) {
-      if (externalErc721TokenIds[_externalErc721][i] == _tokenId) {
+    for (uint256 i = 0; i < prizesErc721TokenIds[_externalErc721].length; i++) {
+      if (prizesErc721TokenIds[_externalErc721][i] == _tokenId) {
         revert("PeriodicPrizeStrategy/erc721-duplicate");
       }
     }
-    externalErc721TokenIds[_externalErc721].push(_tokenId);
+    prizesErc721TokenIds[_externalErc721].push(_tokenId);
+    numberOfPrizes++;
   }
 
   /// @notice Removes an external ERC721 token as an additional prize that can be awarded
@@ -529,7 +545,7 @@ abstract contract PeriodicPrizeStrategy is Initializable,
   /// @param _externalErc721 The address of an ERC721 token to be removed
   /// @param _prevExternalErc721 The address of the previous ERC721 token in the list.
   /// If no previous, then pass the SENTINEL address: 0x0000000000000000000000000000000000000001
-  function removeExternalErc721Award(
+  function removePrizeAward(
     IERC721Upgradeable _externalErc721,
     IERC721Upgradeable _prevExternalErc721
   )
@@ -537,17 +553,18 @@ abstract contract PeriodicPrizeStrategy is Initializable,
     onlyOwner
     requireAwardNotInProgress
   {
-    externalErc721s.removeAddress(address(_prevExternalErc721), address(_externalErc721));
-    _removeExternalErc721AwardTokens(_externalErc721);
+    prizesErc721.removeAddress(address(_prevExternalErc721), address(_externalErc721));
+    _removePrizeByAwardTokens(_externalErc721);
   }
 
-  function _removeExternalErc721AwardTokens(
+  function _removePrizeByAwardTokens(
     IERC721Upgradeable _externalErc721
   )
     internal
   {
-    delete externalErc721TokenIds[_externalErc721];
-    emit ExternalErc721AwardRemoved(_externalErc721);
+    numberOfPrizes = numberOfPrizes.sub(prizesErc721TokenIds[_externalErc721].length);
+    delete prizesErc721TokenIds[_externalErc721];
+    emit PrizeAwardRemovedAll(_externalErc721);
   }
 
   function _requireAwardNotInProgress() internal view {

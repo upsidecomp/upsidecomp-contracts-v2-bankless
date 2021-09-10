@@ -61,38 +61,6 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "contract IERC721Upgradeable",
-        "name": "externalErc721",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "tokenIds",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "ExternalErc721AwardAdded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "contract IERC721Upgradeable",
-        "name": "externalErc721Award",
-        "type": "address"
-      }
-    ],
-    "name": "ExternalErc721AwardRemoved",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": false,
         "internalType": "uint256",
         "name": "prizePeriodStart",
@@ -142,19 +110,6 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "numberOfWinners",
-        "type": "uint256"
-      }
-    ],
-    "name": "NumberOfWinnersSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": true,
         "internalType": "address",
         "name": "previousOwner",
@@ -181,6 +136,38 @@
       }
     ],
     "name": "PeriodicPrizeStrategyListenerSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "contract IERC721Upgradeable",
+        "name": "externalErc721",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "tokenIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "PrizeAwardAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "contract IERC721Upgradeable",
+        "name": "externalErc721Award",
+        "type": "address"
+      }
+    ],
+    "name": "PrizeAwardRemovedAll",
     "type": "event"
   },
   {
@@ -380,7 +367,20 @@
         "type": "uint256[]"
       }
     ],
-    "name": "addExternalErc721Award",
+    "name": "addPrizes",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "winners",
+        "type": "address[]"
+      }
+    ],
+    "name": "awardPrizes",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -541,7 +541,7 @@
   },
   {
     "inputs": [],
-    "name": "currentPrize",
+    "name": "currentPrizeAddresses",
     "outputs": [
       {
         "internalType": "address[]",
@@ -711,11 +711,6 @@
         "internalType": "contract RNGInterface",
         "name": "_rng",
         "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_numberOfWinners",
-        "type": "uint256"
       }
     ],
     "name": "initializeMultipleWinners",
@@ -789,6 +784,19 @@
         "internalType": "bool",
         "name": "",
         "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "numberOfPrizes",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -911,7 +919,7 @@
         "type": "address"
       }
     ],
-    "name": "removeExternalErc721Award",
+    "name": "removePrizeAward",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1033,19 +1041,6 @@
       }
     ],
     "name": "setCurrentTime",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "count",
-        "type": "uint256"
-      }
-    ],
-    "name": "setNumberOfWinners",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
