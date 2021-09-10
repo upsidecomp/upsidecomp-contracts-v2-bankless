@@ -8,7 +8,7 @@ import "@pooltogether/pooltogether-contracts/contracts/prize-pool/stake/StakePri
 contract BanklessPrizePool is StakePrizePool {
   event DistributedAward(address indexed to, address indexed externalToken, uint256 externalTokenId);
 
-  function award(
+  function awardPrize(
     address to,
     address externalToken,
     uint256 tokenId

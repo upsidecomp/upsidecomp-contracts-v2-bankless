@@ -125,6 +125,8 @@ contract BanklessMultipleWinners is PeriodicPrizeStrategy {
     * @param randomNumber Random number seed used to select winners
   */
   function _distribute(uint256 randomNumber) internal override {
+    require(numberOfPrizes > 0, "BanklessMultipleWinners/no-prizes-to-award");
+
     if (IERC20Upgradeable(address(ticket)).totalSupply() == 0) {
       emit NoWinners();
       return;
@@ -156,6 +158,8 @@ contract BanklessMultipleWinners is PeriodicPrizeStrategy {
       bytes32 nextRandomHash = keccak256(abi.encodePacked(nextRandom + 499 + winnerCount*521));
       nextRandom = uint256(nextRandomHash);
     }
+
+    require(winnerCount > 0, "BanklessMultipleWinners/winner-count-zero");
 
     _awardPrizes(winners);
   }
