@@ -10,7 +10,7 @@ const debug = require('debug')('ptv3:PeriodicPrizePool.test')
 let overrides = { gasLimit: 9500000 }
 const SENTINEL = '0x0000000000000000000000000000000000000001'
 
-describe('MultipleWinners', function() {
+describe('BanklessMultipleWinners', function() {
   let wallet, wallet2, wallet3, wallet4
 
   let externalERC20Award, externalERC721Award
@@ -18,6 +18,8 @@ describe('MultipleWinners', function() {
   let comptroller, prizePool, prizeStrategy, token
 
   let ticket, sponsorship, rng, rngFeeToken
+
+  // let poolMaxExitFee = toWei('0.5')
 
   let prizePeriodStart = now()
   let prizePeriodSeconds = 1000
@@ -83,6 +85,16 @@ describe('MultipleWinners', function() {
       sponsorship.address,
       rng.address
     )
+
+    // await prizePool.initializeAll(
+    //     prizeStrategy.address,
+    //     [ticket.address],
+    //     poolMaxExitFee,
+    //     yieldSourceStub.address
+    //   )
+    //
+    // await prizePool.setPrizeStrategy(prizeStrategy.address)
+    // await prizePool.setCreditPlanOf(ticket.address, toWei('0.01'), toWei('0.1'))
 
     debug('initialized!')
   })
@@ -154,54 +166,10 @@ describe('MultipleWinners', function() {
     });
   })
 
-  describe('setBlocklisted()', () => {
-    it('should block an address', async () => {
-      await expect(prizeStrategy.setBlocklisted(wallet4.address, true))
-        .to.emit(prizeStrategy, 'BlocklistSet')
-        .withArgs(wallet4.address, true)
-    })
-
-    it('should block and unblock an address', async () => {
-      await expect(prizeStrategy.setBlocklisted(wallet4.address, true))
-        .to.emit(prizeStrategy, 'BlocklistSet')
-        .withArgs(wallet4.address, true)
-
-        await expect(prizeStrategy.setBlocklisted(wallet4.address, false))
-        .to.emit(prizeStrategy, 'BlocklistSet')
-        .withArgs(wallet4.address, false)
-    })
-  })
-
-  describe('setCarryBlocklist()', () => {
-    it('should enable carrying over the prize if not distributed', async () => {
-      await expect(prizeStrategy.setCarryBlocklist(true))
-        .to.emit(prizeStrategy, 'BlocklistCarrySet')
-        .withArgs(true)
-    })
-
-    it('should block and unblock an address', async () => {
-      await expect(prizeStrategy.setCarryBlocklist(true))
-        .to.emit(prizeStrategy, 'BlocklistCarrySet')
-        .withArgs(true)
-
-        await expect(prizeStrategy.setCarryBlocklist(false))
-        .to.emit(prizeStrategy, 'BlocklistCarrySet')
-        .withArgs(false)
-    })
-  })
-
-  describe('setBlocklistRetryCount()', () => {
-    it('should set the retry the count', async () => {
-      await expect(prizeStrategy.setBlocklistRetryCount(15))
-        .to.emit(prizeStrategy, 'BlocklistRetryCountSet')
-        .withArgs(15)
-    })
-  })
-
-
   describe('distribute()', () => {
     it('should ignore awarding prizes if there are no winners to select', async () => {
-      await prizePool.mock.captureAwardBalance.returns(toWei('10'))
+      await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+      await prizeStrategy.addPrizes(externalERC721Award.address, [1])
       await ticket.mock.draw.withArgs(10).returns(ethers.constants.AddressZero)
       await ticket.mock.totalSupply.returns(0)
       await expect(prizeStrategy.distribute(10))
@@ -209,13 +177,8 @@ describe('MultipleWinners', function() {
     })
 
     it("should revert if too many winners", async () => {
-      await expect(prizeStrategy.awardPrizes([wallet3.address]))
-          .to.be.revertedWith('PeriodicPrizeStrategy/wrong-winner-count')
-
-      await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-      await prizeStrategy.addPrizes(externalERC721Award.address, [1])
-      await expect(prizeStrategy.awardPrizes([wallet3.address, wallet2.address]))
-          .to.be.revertedWith('PeriodicPrizeStrategy/wrong-winner-count')
+      await expect(prizeStrategy.awardPrizes([wallet2.address]))
+          .to.be.revertedWith('PeriodicPrizeStrategy/invalid-winner-array')
     })
 
     it("should work if correct number of winners", async () => {
@@ -229,145 +192,26 @@ describe('MultipleWinners', function() {
 
     it('should award a single winner', async () => {
       await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-      await externalERC721Award.mock.balanceOf.withArgs(prizePool.address).returns(1)
+      await externalERC721Award.mock.balanceOf.withArgs(prizePool.address).returns(0)
       await prizeStrategy.addPrizes(externalERC721Award.address, [1])
-      expect(await prizeStrategy.numberOfWinners()).to.equal(1)
 
       let randomNumber = 10
-      // await prizePool.mock.captureAwardBalance.returns(toWei('8'))
-      await ticket.mock.draw.withArgs(randomNumber).returns(wallet3.address)
-
+      await ticket.mock.draw.withArgs(randomNumber).returns(wallet2.address)
       await ticket.mock.totalSupply.returns(1000)
-
-      await prizePool.mock.awardPrize.withArgs(wallet3.address, externalERC721Award.address, 1).returns()
 
       await prizeStrategy.distribute(randomNumber)
     })
 
-    it('should blocklist address and reach the max retry count with two winners', async () => {
+    it('should award to multiple winners', async () => {
       await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
       await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
-      await externalERC721Award.mock.ownerOf.withArgs(3).returns(prizePool.address)
-      await externalERC721Award.mock.balanceOf.withArgs(prizePool.address).returns(3)
-      await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2, 3])
-      expect(await prizeStrategy.numberOfWinners()).to.equal(3)
-
-      await prizeStrategy.setBlocklisted(wallet2.address, true)
-      await prizeStrategy.setBlocklistRetryCount(2)
-      await prizeStrategy.setCarryBlocklist(true)
-
-      let randomNumber = 10
-      const firstRandomNumber = '37064725103404186846061877202634929988330668626056892439536191969138221532167'
-      const secondRandomNumber = '111075169755475008042669917706477765047943200936858446750481279128459241178463'
-      const thirdRandomNumber = '14687395224112754347317881744031674455454498128112254032692560820774778924569'
-
-      await prizePool.mock.captureAwardBalance.returns(toWei('9'))
-
-      await ticket.mock.draw.withArgs(randomNumber).returns(wallet2.address)
-      await ticket.mock.draw.withArgs(firstRandomNumber).returns(wallet3.address)
-      await ticket.mock.draw.withArgs(secondRandomNumber).returns(wallet4.address)
-      await ticket.mock.draw.withArgs(thirdRandomNumber).returns(wallet2.address)
-      await ticket.mock.totalSupply.returns(1000)
-
-      await prizePool.mock.awardPrize.withArgs(wallet3.address, externalERC721Award.address, 1).returns()
-      await prizePool.mock.awardPrize.withArgs(wallet4.address, externalERC721Award.address, 1).returns()
-
-      expect(await prizeStrategy.distribute(randomNumber))
-        .to.emit(prizeStrategy, 'RetryMaxLimitReached')
-        .withArgs(2)
-    })
-
-    it('should blocklist address and reach second NoWinners event', async () => {
-      await prizeStrategy.setBlocklisted(wallet4.address, true)
-      await prizeStrategy.setBlocklistRetryCount(1)
-      await prizeStrategy.setCarryBlocklist(true)
-
-      let randomNumber = 10
-      await ticket.mock.draw.withArgs(randomNumber).returns(wallet4.address)
-      await ticket.mock.totalSupply.returns(1000)
-
-      await expect(prizeStrategy.distribute(randomNumber))
-        .to.be.revertedWith(prizeStrategy, 'BanklessMultipleWinners/winner-count-zero')
-    })
-
-    it('should blocklist address and distribute prize to single winner after selecting blocked user', async () => {
-      await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-      await externalERC721Award.mock.balanceOf.withArgs(prizePool.address).returns(1)
-      await prizeStrategy.addPrizes(externalERC721Award.address, [1])
-      expect(await prizeStrategy.numberOfWinners()).to.equal(1)
-
-      await prizeStrategy.setBlocklisted(wallet2.address, true)
-      await prizeStrategy.setBlocklistRetryCount(5)
-      await prizeStrategy.setCarryBlocklist(true)
-
-      let randomNumber = 10
-      const firstRandomNumber = '37064725103404186846061877202634929988330668626056892439536191969138221532167'
-      await ticket.mock.draw.withArgs(randomNumber).returns(wallet2.address)
-      await ticket.mock.draw.withArgs(firstRandomNumber).returns(wallet3.address)
-      await ticket.mock.totalSupply.returns(1000)
-
-      await prizePool.mock.awardPrize.withArgs(wallet3.address, externalERC721Award.address, 1).returns()
-
-      await prizeStrategy.distribute(randomNumber)
-
-      expect(await prizeStrategy.numberOfWinners()).to.equal(0)
-      expect(await prizeStrategy.currentPrizeAddresses()).to.deep.equal([])
-    })
-
-    it('should blocklist address and split the prize evenly between 2 winners', async () => {
-      await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-      await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
-      await externalERC721Award.mock.balanceOf.withArgs(prizePool.address).returns(2)
+      await externalERC721Award.mock.balanceOf.withArgs(prizePool.address).returns(0)
       await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2])
-      expect(await prizeStrategy.numberOfWinners()).to.equal(2)
-
-      await prizeStrategy.setBlocklisted(wallet2.address, true)
-      await prizeStrategy.setBlocklistRetryCount(2)
 
       let randomNumber = 10
-      const firstRandomNumber = '37064725103404186846061877202634929988330668626056892439536191969138221532167'
-      const secondRandomNumber = '111075169755475008042669917706477765047943200936858446750481279128459241178463'
-
       await ticket.mock.draw.withArgs(randomNumber).returns(wallet2.address)
-      await ticket.mock.draw.withArgs(firstRandomNumber).returns(wallet3.address)
-      await ticket.mock.draw.withArgs(secondRandomNumber).returns(wallet4.address)
+      await ticket.mock.draw.withArgs(randomNumber).returns(wallet3.address)
       await ticket.mock.totalSupply.returns(1000)
-
-      await prizePool.mock.awardPrize.withArgs(wallet3.address, externalERC721Award.address, 1).returns()
-      await prizePool.mock.awardPrize.withArgs(wallet4.address, externalERC721Award.address, 2).returns()
-
-      await prizeStrategy.distribute(randomNumber)
-
-      expect(await prizeStrategy.numberOfWinners()).to.equal(0)
-      expect(await prizeStrategy.currentPrizeAddresses()).to.deep.equal([])
-    })
-
-    it('should blocklist address and carry over the prize after awarding 2 winners', async () => {
-      await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
-      await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
-      await externalERC721Award.mock.ownerOf.withArgs(3).returns(prizePool.address)
-      await externalERC721Award.mock.balanceOf.withArgs(prizePool.address).returns(3)
-      await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2, 3])
-      expect(await prizeStrategy.numberOfWinners()).to.equal(3)
-
-      await prizeStrategy.setBlocklisted(wallet2.address, true)
-      await prizeStrategy.setBlocklistRetryCount(2)
-      await prizeStrategy.setCarryBlocklist(true)
-
-      let randomNumber = 10
-      const firstRandomNumber = '37064725103404186846061877202634929988330668626056892439536191969138221532167'
-      const secondRandomNumber = '111075169755475008042669917706477765047943200936858446750481279128459241178463'
-      const thirdRandomNumber = '14687395224112754347317881744031674455454498128112254032692560820774778924569'
-
-      await prizePool.mock.captureAwardBalance.returns(toWei('9'))
-      await ticket.mock.draw.withArgs(randomNumber).returns(wallet2.address)
-      await ticket.mock.draw.withArgs(firstRandomNumber).returns(wallet3.address)
-      await ticket.mock.draw.withArgs(secondRandomNumber).returns(wallet4.address)
-      await ticket.mock.draw.withArgs(thirdRandomNumber).returns(wallet2.address)
-      await ticket.mock.totalSupply.returns(1000)
-
-      await prizePool.mock.award.withArgs(wallet3.address, toWei('3'), ticket.address).returns()
-      await prizePool.mock.award.withArgs(wallet4.address, toWei('3'), ticket.address).returns()
 
       await prizeStrategy.distribute(randomNumber)
     })
