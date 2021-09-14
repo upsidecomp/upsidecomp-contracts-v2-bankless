@@ -94,11 +94,6 @@
             "internalType": "uint256",
             "name": "ticketCreditRateMantissa",
             "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "splitExternalErc20Awards",
-            "type": "bool"
           }
         ],
         "internalType": "struct BanklessMultipleWinnersBuilder.MultipleWinnersConfig",

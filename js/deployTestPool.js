@@ -57,7 +57,7 @@ async function main() {
     sponsorshipName: "Sponsorship",
     sponsorshipSymbol: "SPON",
     ticketCreditLimitMantissa: params.creditLimit,
-    ticketCreditRateMantissa: params.creditRate,
+    ticketCreditRateMantissa: params.creditRate
   }
 
   debug('deploying bank stake pool')
@@ -65,7 +65,7 @@ async function main() {
     token: tokenResult.address,
     maxExitFeeMantissa: params.maxExitFeeMantissa
   }
-  // console.log(poolBuilder)
+
   let tx = await poolBuilder.createBanklessMultipleWinners(stakePoolConfig, multipleWinnersConfig, token.decimals())
   let events = await getEvents(poolBuilder, tx)
   let event = events[0]
@@ -77,7 +77,7 @@ async function main() {
 
   debug(`sponsorship: ${sponsorship.address}, ticket: ${ticket.address}`)
 
-  await prizePool.setCreditPlanOf(ticket.address, params.creditRate || toWei('0.1').div(prizePeriodSeconds), params.creditLimit || toWei('0.1'))
+  // await prizePool.setCreditPlanOf(ticket.address, params.creditRate || toWei('0.1').div(prizePeriodSeconds), params.creditLimit || toWei('0.1'))
 
   const prizeStrategyAddress = await prizePool.prizeStrategy()
 
@@ -92,7 +92,10 @@ async function main() {
 
   const prizeStrategy = await hardhat.ethers.getContractAt('BanklessMultipleWinnersHarness', prizeStrategyAddress, signer)
 
+  debug("prizeStrategy: ", prizeStrategy)
+
   debug(`Done!`)
+
 
   process.exit(0)
 }

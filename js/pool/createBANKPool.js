@@ -33,7 +33,6 @@ async function run() {
   debug(`Using admin address: ${admin}\n`)
   debug(`Using rng address: ${rng}\n`)
 
-
   let tokenResult = await deployments.get("Bank")
   let banklessPoolBuilder = await deployments.get("BanklessPoolBuilder")
   const builder = await hardhat.ethers.getContractAt('BanklessPoolBuilder', banklessPoolBuilder.address, signer)
@@ -58,9 +57,7 @@ async function run() {
     sponsorshipName: "Upside x BanklessDAO Sponsorship",
     sponsorshipSymbol: "upsBANK",
     ticketCreditLimitMantissa: ethers.utils.parseEther('0'),
-    ticketCreditRateMantissa: ethers.utils.parseEther('0'),
-    prizeSplits: [],
-    numberOfWinners: 1,
+    ticketCreditRateMantissa: ethers.utils.parseEther('0')
   }
 
   debug(`Creating Bankless Prize Pool...`)
@@ -76,7 +73,22 @@ async function run() {
 
   debug(`sponsorship: ${sponsorship.address}, ticket: ${ticket.address}`)
 
-  // await runPoolLifecycle(prizePool, usdtHolder)
+  const prizeStrategyAddress = await prizePool.prizeStrategy()
+
+  debug("Addresses: \n", {
+    rngService: rng,
+    token: tokenResult.address,
+    ticket: ticket.address,
+    prizePool: prizePool.address,
+    sponsorship: sponsorship.address,
+    prizeStrategy: prizeStrategyAddress,
+  })
+
+  const prizeStrategy = await hardhat.ethers.getContractAt('BanklessMultipleWinners', prizeStrategyAddress, signer)
+
+  debug("prizeStrategyAddress: ", prizeStrategy.address)
+
+  debug(`Done!`)
 }
 
 run()

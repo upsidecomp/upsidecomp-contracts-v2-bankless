@@ -21,7 +21,6 @@ contract BanklessMultipleWinnersBuilder {
     string sponsorshipSymbol;
     uint256 ticketCreditLimitMantissa;
     uint256 ticketCreditRateMantissa;
-    bool splitExternalErc20Awards;
   }
 
   BanklessMultipleWinnersProxyFactory public multipleWinnersProxyFactory;
