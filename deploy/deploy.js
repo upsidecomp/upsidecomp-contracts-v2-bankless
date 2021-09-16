@@ -85,12 +85,12 @@ module.exports = async (hardhat) => {
   await deploy1820(signer)
 
   cyan("\nDeploying Bank...")
-  const bankResult = await deploy("Bank", {
+  const bankResult = await deploy("ERC20Mintable", {
     args: [
       admin,
       admin
     ],
-    contract: 'Bank',
+    contract: 'ERC20Mintable',
     from: deployer,
     skipIfAlreadyDeployed: false
   })

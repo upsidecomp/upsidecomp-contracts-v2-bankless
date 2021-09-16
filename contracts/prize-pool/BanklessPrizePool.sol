@@ -18,12 +18,7 @@ contract BanklessPrizePool is StakePrizePool {
   {
     require(_canAwardExternal(externalToken), "BanklessPrizePool/invalid-external-token");
 
-    try IERC721Upgradeable(externalToken).safeTransferFrom(address(this), to, tokenId){
-
-    }
-    catch(bytes memory error){
-      emit ErrorAwardingExternalERC721(error);
-    }
+    IERC721Upgradeable(externalToken).safeTransferFrom(address(this), to, tokenId);
 
     emit DistributedAward(to, externalToken, tokenId);
   }

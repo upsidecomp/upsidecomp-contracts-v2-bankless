@@ -184,7 +184,7 @@ abstract contract PeriodicPrizeStrategy is Initializable,
 
     prizesErc721.initialize();
 
-    // 30 min a
+    // 30 min
     _setRngRequestTimeout(1800);
 
     emit Initialized(
@@ -275,6 +275,7 @@ abstract contract PeriodicPrizeStrategy is Initializable,
       if (balance > 0) {
         for (uint256 i = 0; i < prizesErc721TokenIds[IERC721Upgradeable(currentToken)].length; i++) {
               prizePool.awardPrize(winners[j], currentToken, prizesErc721TokenIds[IERC721Upgradeable(currentToken)][i]);
+              j++;
         }
       }
       _removePrizeByAwardTokens(IERC721Upgradeable(currentToken));

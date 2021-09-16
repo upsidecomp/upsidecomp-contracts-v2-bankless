@@ -10,14 +10,10 @@ contract ERC721Mintable is ERC721Upgradeable {
       ERC721Upgradeable.__ERC721_init(name, symbol);
     }
 
-    uint256 private tokenId = 0;
+    function mint(address to, uint256 tokenId) public returns (bool) {
+        _safeMint(to, tokenId);
 
-    function mint() public returns (bool) {
-        tokenId++;
-
-        _safeMint(msg.sender, tokenId);
-
-        emit Minted(msg.sender, tokenId);
+        emit Minted(to, tokenId);
 
         return true;
     }

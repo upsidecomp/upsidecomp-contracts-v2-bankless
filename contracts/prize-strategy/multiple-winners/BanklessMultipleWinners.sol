@@ -65,8 +65,9 @@ contract BanklessMultipleWinners is PeriodicPrizeStrategy {
     address[] memory winners = new address[](numberOfWinners);
     uint256 nextRandom = randomNumber;
     uint256 winnerCount = 0;
+
     while (winnerCount < numberOfWinners) {
-      address winner = ticket.draw(nextRandom);
+      winners[winnerCount] = ticket.draw(nextRandom);
       winnerCount++;
       nextRandom = uint256(keccak256(abi.encodePacked(nextRandom + 499 + winnerCount*521)));
     }
