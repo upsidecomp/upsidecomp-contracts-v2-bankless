@@ -253,21 +253,36 @@ describe('BanklessMultipleWinners', function() {
       })
 
       it('may distribute to the same winner twice', async () => {
-        await prizePool.mock.awardPrize.withArgs(wallet.address, externalERC721Award.address, 2).returns()
-
         await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
         await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
         await externalERC721Award.mock.balanceOf.withArgs(prizePool.address).returns(2)
         await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2])
         expect(await prizeStrategy.numberOfWinners()).to.equal(2)
 
+        await prizePool.mock.awardPrize.withArgs(wallet.address, externalERC721Award.address, 1).returns()
+        await prizePool.mock.awardPrize.withArgs(wallet.address, externalERC721Award.address, 2).returns()
+
         await prizeStrategy.distribute(92) // this hashes out to the same winner twice
+
+        expect(await prizeStrategy.numberOfWinners()).to.equal(0)
       })
 
       it('should distribute to more than one winner', async () => {
-        await prizePool.mock.award.withArgs(wallet.address, toWei('3'), ticket.address).returns()
-        await prizePool.mock.award.withArgs(wallet2.address, toWei('3'), ticket.address).returns()
+        await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+        await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
+        await externalERC721Award.mock.balanceOf.withArgs(prizePool.address).returns(2)
+        await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2])
+        expect(await prizeStrategy.numberOfWinners()).to.equal(2)
 
+        await prizePool.mock.awardPrize.withArgs(wallet.address, externalERC721Award.address, 1).returns()
+        await prizePool.mock.awardPrize.withArgs(wallet2.address, externalERC721Award.address, 2).returns()
+
+        await prizeStrategy.distribute(90) // this hashes out to two different winners
+
+        expect(await prizeStrategy.numberOfWinners()).to.equal(0)
+      })
+
+      it('should distribute to a single winner twice, and another winner once', async () => {
         await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
         await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
         await externalERC721Award.mock.ownerOf.withArgs(3).returns(prizePool.address)
@@ -275,7 +290,84 @@ describe('BanklessMultipleWinners', function() {
         await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2, 3])
         expect(await prizeStrategy.numberOfWinners()).to.equal(3)
 
-        await prizeStrategy.distribute(90)
+        await prizePool.mock.awardPrize.withArgs(wallet.address, externalERC721Award.address, 1).returns()
+        await prizePool.mock.awardPrize.withArgs(wallet2.address, externalERC721Award.address, 2).returns()
+        await prizePool.mock.awardPrize.withArgs(wallet2.address, externalERC721Award.address, 3).returns()
+
+        await prizeStrategy.distribute(90) // this hashes out to two different winners
+
+        expect(await prizeStrategy.numberOfWinners()).to.equal(0)
+      })
+
+      describe("multi-collection giveaway", () => {
+        let externalERC721Award2;
+
+        beforeEach(async () => {
+          const IERC721 = await hre.artifacts.readArtifact("IERC721Upgradeable")
+          externalERC721Award2 = await deployMockContract(wallet, IERC721.abi, overrides)
+          await externalERC721Award2.mock.supportsInterface.returns(true)
+          await externalERC721Award2.mock.supportsInterface.withArgs('0xffffffff').returns(false)
+          await prizePool.mock.canAwardExternal.withArgs(externalERC721Award2.address).returns(true)
+        })
+
+        it('may distribute to the same winner', async () => {
+          await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+          await externalERC721Award.mock.balanceOf.withArgs(prizePool.address).returns(1)
+          await prizeStrategy.addPrizes(externalERC721Award.address, [1])
+
+          await externalERC721Award2.mock.ownerOf.withArgs(1).returns(prizePool.address)
+          await externalERC721Award2.mock.balanceOf.withArgs(prizePool.address).returns(1)
+          await prizeStrategy.addPrizes(externalERC721Award2.address, [1])
+
+          expect(await prizeStrategy.numberOfWinners()).to.equal(2)
+
+          await prizePool.mock.awardPrize.withArgs(wallet.address, externalERC721Award.address, 1).returns()
+          await prizePool.mock.awardPrize.withArgs(wallet.address, externalERC721Award2.address, 1).returns()
+
+          await prizeStrategy.distribute(92) // this hashes out to the same winner twice
+
+          expect(await prizeStrategy.numberOfWinners()).to.equal(0)
+        })
+
+        it('may distribute to the multiple winners', async () => {
+          await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+          await externalERC721Award.mock.balanceOf.withArgs(prizePool.address).returns(1)
+          await prizeStrategy.addPrizes(externalERC721Award.address, [1])
+
+          await externalERC721Award2.mock.ownerOf.withArgs(1).returns(prizePool.address)
+          await externalERC721Award2.mock.balanceOf.withArgs(prizePool.address).returns(1)
+          await prizeStrategy.addPrizes(externalERC721Award2.address, [1])
+
+          expect(await prizeStrategy.numberOfWinners()).to.equal(2)
+
+          await prizePool.mock.awardPrize.withArgs(wallet.address, externalERC721Award2.address, 1).returns()
+          await prizePool.mock.awardPrize.withArgs(wallet2.address, externalERC721Award.address, 1).returns()
+
+          await prizeStrategy.distribute(90) // this hashes out to the same winner twice
+
+          expect(await prizeStrategy.numberOfWinners()).to.equal(0)
+        })
+
+        it('may distribute many prizes to the multiple winners', async () => {
+          await externalERC721Award.mock.ownerOf.withArgs(1).returns(prizePool.address)
+          await externalERC721Award.mock.ownerOf.withArgs(2).returns(prizePool.address)
+          await externalERC721Award.mock.balanceOf.withArgs(prizePool.address).returns(1)
+          await prizeStrategy.addPrizes(externalERC721Award.address, [1, 2])
+
+          await externalERC721Award2.mock.ownerOf.withArgs(1).returns(prizePool.address)
+          await externalERC721Award2.mock.balanceOf.withArgs(prizePool.address).returns(1)
+          await prizeStrategy.addPrizes(externalERC721Award2.address, [1])
+
+          expect(await prizeStrategy.numberOfWinners()).to.equal(3)
+
+          await prizePool.mock.awardPrize.withArgs(wallet.address, externalERC721Award2.address, 1).returns()
+          await prizePool.mock.awardPrize.withArgs(wallet2.address, externalERC721Award.address, 1).returns()
+          await prizePool.mock.awardPrize.withArgs(wallet2.address, externalERC721Award.address, 2).returns()
+
+          await prizeStrategy.distribute(90) // this hashes out to the same winner twice
+
+          expect(await prizeStrategy.numberOfWinners()).to.equal(0)
+        })
       })
     })
   })

@@ -75,6 +75,18 @@ describe('External Awards', () => {
       await env.expectUserToHaveExternalAwardToken({ user: 3, index: 0, tokenIds: tokenIds })
       await env.expectEmptyPrizeList()
     })
+
+    it("can award large prizes amount", async () => {
+      const tokenIds = [...Array(100).keys()]
+
+      await env.createPool({ prizePeriodSeconds: 10, creditLimit: '0.1', creditRate: '0.01' })
+      await env.addPrize({ user: 0, tokenIds: tokenIds, name: "TEST", symbol: "TEST" })
+      await env.currentPrizeTokenIdsOfIndex({ user: 0, index: 0, tokenIds: tokenIds })
+      await env.buyTickets({ user: 1, tickets: 100 })
+      await env.awardPrize()
+      await env.expectUserToHaveExternalAwardToken({ user: 1, index: 0, tokenIds: tokenIds })
+      await env.expectEmptyPrizeList()
+    })
   })
 
   describe('mulitple collection', () => {

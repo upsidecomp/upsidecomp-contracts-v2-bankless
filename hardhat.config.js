@@ -10,6 +10,7 @@ require('hardhat-deploy-ethers')
 require('solidity-coverage')
 require("@nomiclabs/hardhat-etherscan")
 require('hardhat-abi-exporter')
+require("hardhat-gas-reporter");
 
 const testnetAdmin = '0xe693cb9ca5ec4b2f6a4111ae53308bef811e9e3e' // Account 1
 const testnetUser1 = '0x2976134d99b6c9ac1bc8d6407f07b31c9247c230' // Account 3
@@ -31,8 +32,8 @@ const config = {
   },
   networks,
   gasReporter: {
-    currency: 'CHF',
-    gasPrice: 21,
+    currency: 'USD',
+    gasPrice: 100,
     enabled: (process.env.REPORT_GAS) ? true : false
   },
   namedAccounts: {

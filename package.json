@@ -26,6 +26,7 @@
     "@pooltogether/uniform-random-number": "1.0.0-beta.1",
     "@pooltogether/yield-source-interface": "^1.0.1",
     "deploy-eip-1820": "1.0.0",
+    "hardhat-gas-reporter": "^1.0.4",
     "sortition-sum-tree-factory": "0.1.0"
   },
   "devDependencies": {
