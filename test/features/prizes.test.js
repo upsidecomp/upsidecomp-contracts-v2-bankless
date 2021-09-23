@@ -159,7 +159,22 @@ describe('External Awards', () => {
     })
   });
 
-  describe("more than 1 competition", () => {
-    
+  it("should run more than 1 competition", async () => {
+    const collectionATokenIds = [1, 2]
+    const collectionBTokenIds = [1, 2, 3]
+
+    await env.createPool({ prizePeriodSeconds: 10, creditLimit: '0', creditRate: '0' })
+    await env.addPrize({ user: 0, tokenIds: collectionATokenIds, name: "TESTA", symbol: "TEST" })
+    await env.currentPrizeTokenIdsOfIndex({ user: 0, index: 0, tokenIds: collectionATokenIds })
+    await env.buyTickets({ user: 2, tickets: 100 })
+    await env.awardPrizeToToken({ token: 0 })
+    await env.expectUserToHaveExternalAwardToken({ user: 2, index: 0, tokenIds: collectionATokenIds })
+    await env.expectEmptyPrizeList()
+
+    await env.addPrize({ user: 0, tokenIds: collectionBTokenIds, name: "TESTB", symbol: "TEST" })
+    await env.currentPrizeTokenIdsOfIndex({ user: 0, index: 1, tokenIds: collectionBTokenIds })
+    await env.awardPrizeToToken({ token: 1 })
+    await env.expectUserToHaveExternalAwardToken({ user: 2, index: 1, tokenIds: collectionBTokenIds })
+    await env.expectEmptyPrizeList()
   });
 })

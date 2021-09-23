@@ -39,7 +39,7 @@ async function deployTestPool({
 
   let linkToken = await ERC20Mintable.deploy('Link Token', 'LINK')
   let rngServiceMock = await hardhat.ethers.getContractAt('RNGServiceMock', rngServiceMockResult.address, wallet)
-  await rngServiceMock.setRequestFee(linkToken.address, toWei('1'))
+  await rngServiceMock.setRequestFee(linkToken.address, toWei('0'))
 
   const multipleWinnersConfig = {
     proxyAdmin: AddressZero,

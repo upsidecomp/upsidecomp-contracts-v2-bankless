@@ -229,12 +229,6 @@ function PoolEnv() {
     expect(ticketInterest).to.equalish(toWei(credit), 300)
   }
 
-
-  // this.expectUserToHaveExternalAwardAmount = async function ({ user, externalAward, amount }) {
-  //   let wallet = await this.wallet(user)
-  //   expect(await this.externalERC20Awards[externalAward].balanceOf(wallet.address)).to.equalish(toWei(amount), 300)
-  // }
-
   this.startAward = async function () {
     debug(`startAward`)
 
