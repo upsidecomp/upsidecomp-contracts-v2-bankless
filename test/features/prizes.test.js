@@ -158,4 +158,8 @@ describe('External Awards', () => {
       await env.expectEmptyPrizeList()
     })
   });
+
+  describe("more than 1 competition", () => {
+    
+  });
 })

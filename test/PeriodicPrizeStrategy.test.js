@@ -332,6 +332,55 @@ describe('PeriodicPrizeStrategy', () => {
     })
   })
 
+  describe("beforeTokenMint()", () => {
+    it('should allow calling', async () => {
+      await prizePool.call(
+        prizeStrategy,
+        'beforeTokenMint(address,uint256,address,address)',
+        wallet.address,
+        toWei('10'),
+        wallet.address,
+        wallet.address
+      )
+    })
+
+    it('only ticket can be used to invoke', async () => {
+      await rngFeeToken.mock.allowance.returns(0)
+      await rngFeeToken.mock.approve.withArgs(rng.address, toWei('1')).returns(true);
+      await rng.mock.requestRandomNumber.returns('11', '1');
+      await prizeStrategy.setCurrentTime(await prizeStrategy.prizePeriodEndAt());
+      await prizeStrategy.startAward();
+
+      await prizePool.call(
+        prizeStrategy,
+        'beforeTokenTransfer(address,address,uint256,address)',
+        wallet.address,
+        wallet2.address,
+        toWei('10'),
+        wallet.address
+      )
+    })
+
+    it('should revert on ticket transfer if awarding is happening', async () => {
+      await rngFeeToken.mock.allowance.returns(0)
+      await rngFeeToken.mock.approve.withArgs(rng.address, toWei('1')).returns(true);
+      await rng.mock.requestRandomNumber.returns('11', '1');
+      await prizeStrategy.setCurrentTime(await prizeStrategy.prizePeriodEndAt());
+      await prizeStrategy.startAward();
+
+      await expect(
+        prizePool.call(
+          prizeStrategy,
+          'beforeTokenTransfer(address,address,uint256,address)',
+          wallet.address,
+          wallet2.address,
+          toWei('10'),
+          ticket.address
+        ))
+        .to.be.revertedWith('PeriodicPrizeStrategy/rng-in-flight')
+    })
+  })
+
   describe('currentPrizeAddresses()', () => {
     describe('single ERC721 collection', () => {
       it('should allow anyone to retrieve the list of external ERC721 tokens attached to the prize; NFT Count: 1', async () => {
@@ -721,8 +770,11 @@ describe('PeriodicPrizeStrategy', () => {
     it('should award the winner', async () => {
       debug('Setting time')
 
-      await distributor.mock.distribute.withArgs('48849787646992769944319009300540211125598274780817112954146168253338351566848').returns()
+      const beforeAwardListenerStub = await hre.ethers.getContractFactory("BeforeAwardListenerStub")
+      let beforeAwardListener = await beforeAwardListenerStub.deploy()
 
+      await distributor.mock.distribute.withArgs('48849787646992769944319009300540211125598274780817112954146168253338351566848').returns()
+      await prizeStrategy.setBeforeAwardListener(beforeAwardListener.address)
       await prizeStrategy.setPeriodicPrizeStrategyListener(periodicPrizeStrategyListener.address)
       await periodicPrizeStrategyListener.mock.afterPrizePoolAwarded.withArgs('48849787646992769944319009300540211125598274780817112954146168253338351566848', await prizeStrategy.prizePeriodStartedAt()).returns()
 

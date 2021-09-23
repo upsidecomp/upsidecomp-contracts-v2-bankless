@@ -194,6 +194,13 @@ function PoolEnv() {
     expect(await token.balanceOf(wallet.address)).to.equalish(amount, 300)
   }
 
+  this.expectUserToHaveExactTokens = async function ({ user, tokens }) {
+    let wallet = await this.wallet(user)
+    let token = await this.token(wallet)
+    let amount = toWei(tokens)
+    expect(await token.balanceOf(wallet.address)).to.equal(amount)
+  }
+
   this.expectUserToHaveGovernanceTokens = async function ({ user, tokens }) {
     let wallet = await this.wallet(user)
     let governanceToken = await this.governanceToken(wallet)

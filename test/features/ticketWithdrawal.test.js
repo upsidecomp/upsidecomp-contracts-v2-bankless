@@ -47,6 +47,34 @@ describe('Withdraw Feature', () => {
       await env.expectUserToHaveCredit({ user: 1, credit: 10 })
     })
 
+    it('should not have withdraw fees if no credit limt', async () => {
+      // invoke new pool: creditRate == 0, meaning no fees
+      await env.createPool({ prizePeriodSeconds: 100, creditLimit: '0', creditRate: '0' })
+
+      // event 1
+      await env.buyTickets({ user: 1, tickets: 200 }) // user buys 200 upBANK with 200 BANK
+      await env.setCurrentTime(10)
+      await env.withdrawInstantly({ user: 1, tickets: 200 }) // user withdraws 200 upBANK
+      await env.expectUserToHaveExactTokens({ user: 1, tokens: 200 }) // user is expected to have 200 BANK
+
+      await env.setCurrentTime(30)
+
+      // event 2
+      await env.buyTickets({ user: 1, tickets: 100 }) // user buys 100 upBANK with 100 BANK
+      await env.expectUserToHaveExactTokens({ user: 1, tokens: 100 }) // user is expected to have 100 BANK
+
+      await env.setCurrentTime(70)
+
+      // event 3
+      await env.buyTickets({ user: 1, tickets: 100 }) // user buys another 100 upBANK with 100 BANK
+      await env.expectUserToHaveExactTokens({ user: 1, tokens: 0 }) // user is expected to have 0 BANK (event 2 + event 3)
+
+      // event 4
+      await env.withdrawInstantly({ user: 1, tickets: 200 }) // // user withdraw 200 upBANK
+      await env.expectUserToHaveExactTokens({ user: 1, tokens: 200 }) // // user is expected to have 200 BANK
+    })
+
+
     describe('with very large amounts', () => {
       let largeAmount = '999999999999999999' // 999 quadrillion
 
