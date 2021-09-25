@@ -46,14 +46,15 @@ contract BanklessPoolBuilder {
   function createBanklessMultipleWinners(
     BanklessPrizePoolConfig memory prizePoolConfig,
     BanklessMultipleWinnersBuilder.MultipleWinnersConfig memory prizeStrategyConfig,
-    uint8 decimals
+    uint8 decimals,
+    address owner
   ) external returns (BanklessPrizePool) {
     BanklessPrizePool prizePool = banklessPrizePoolProxyFactory.create();
     BanklessMultipleWinners prizeStrategy = multipleWinnersBuilder.createMultipleWinners(
       prizePool,
       prizeStrategyConfig,
       decimals,
-      msg.sender
+      owner
     );
     prizePool.initialize(
       reserveRegistry,
@@ -67,7 +68,7 @@ contract BanklessPoolBuilder {
       prizeStrategyConfig.ticketCreditRateMantissa.toUint128(),
       prizeStrategyConfig.ticketCreditLimitMantissa.toUint128()
     );
-    prizePool.transferOwnership(msg.sender);
+    prizePool.transferOwnership(owner);
     emit BanklessPrizePoolWithMultipleWinnersCreated(prizePool, prizeStrategy);
     return prizePool;
   }

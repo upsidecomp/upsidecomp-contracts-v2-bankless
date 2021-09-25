@@ -13,9 +13,9 @@ require('hardhat-abi-exporter')
 require("hardhat-gas-reporter");
 
 const testnetAdmin = '0xe693cb9ca5ec4b2f6a4111ae53308bef811e9e3e' // Account 1
-const testnetUser1 = '0x2976134d99b6c9ac1bc8d6407f07b31c9247c230' // Account 3
-const testnetUser2 = '0x1e33edfd7bb11ea57cc8e2bd7547ccfef8f21e6f' // Account 4
-const testnetUser3 = '0x36e1d0a149b5ab87c74e91cbd4903fef709421c6' // Account 5
+const testnetUser1 = '0x2976134d99b6C9AC1bC8D6407F07B31c9247c230' // Account 3
+const testnetUser2 = '0x1e33eDFd7BB11eA57Cc8E2Bd7547cCFEf8F21e6F' // Account 4
+const testnetUser3 = '0x36e1d0A149b5aB87C74E91CBd4903Fef709421c6' // Account 5
 
 const optimizerEnabled = !process.env.OPTIMIZER_DISABLED
 

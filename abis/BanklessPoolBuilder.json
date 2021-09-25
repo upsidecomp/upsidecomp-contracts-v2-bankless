@@ -127,6 +127,11 @@
         "internalType": "uint8",
         "name": "decimals",
         "type": "uint8"
+      },
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
       }
     ],
     "name": "createBanklessMultipleWinners",
