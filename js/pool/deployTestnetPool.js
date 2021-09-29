@@ -5,8 +5,9 @@ const {
   getPrizePoolAddressFromBuilderTransaction,
 } = require('../helpers/runPoolLifecycle')
 
-const debug = require('debug')('ptv3:deployBankless')
+const debug = require('debug')('ptv3:deployTestnetPool')
 const { mintBank } = require('../helpers/mintBank')
+const { addTestnetPrizes } = require('../helpers/addTestnetPrizes')
 const { getEvents } = require('../../test/helpers/getEvents')
 
 function dim() {
@@ -41,6 +42,8 @@ async function main() {
   debug(`Using BANK @ ${tokenResult.address}`)
 
   const block = await ethers.provider.getBlock()
+
+  const numberOfPrizes = 5
 
   const banklessPrizePoolConfig = {
     token: tokenResult.address,
@@ -85,13 +88,40 @@ async function main() {
     prizeStrategy: prizeStrategyAddress,
   })
 
-  const prizeStrategy = await hardhat.ethers.getContractAt('BanklessMultipleWinners', prizeStrategyAddress, signer)
+  const prizeStrategy = await hardhat.ethers.getContractAt('BanklessMultipleWinners', prizeStrategyAddress, await ethers.provider.getSigner(admin))
 
   debug("prizeStrategyAddress: ", prizeStrategy.address)
 
-  debug("Minting Bank Tokens")
+  debug("Post-Contract Deployment Strategies")
 
+  // create bank tokens
   await mintBank();
+
+  // create prizes
+  const res = await addTestnetPrizes(prizePool.address, numberOfPrizes);
+
+  debug(`Add prizes w tokenIds ${res.tokenIds} to prizes strategy`)
+
+  // add prizes
+  let tx2 = await prizeStrategy.addPrizes(res.erc721Address, res.tokenIds)
+  await ethers.provider.waitForTransaction(tx2.hash);
+
+  let prizes = await prizeStrategy.currentPrizeAddresses()
+  console.log(prizes)
+  let tokenIds = await prizeStrategy.currentPrizeTokenIds(prizes[0])
+
+  debug("Prizes: ", {
+    prizeAddress: prizes[0],
+    tokenIds: tokenIds
+  })
+  // debug("Prizes: \n", {
+  //   prizes: addresses.map(async (item) => {
+  //     return {
+  //       address: item,
+  //       tokenIds: await prizeStrategy.currentPrizeTokenIds(item)
+  //     }
+  //   })
+  // })
 
   debug(`Done!`)
 }

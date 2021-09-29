@@ -56,7 +56,7 @@ async function deployTestPool({
 
     debug('deploying bankless stake pool')
     const stakePoolConfig = {token: tokenResult.address, maxExitFeeMantissa}
-    let tx = await poolBuilder.createBanklessMultipleWinners(stakePoolConfig, multipleWinnersConfig, await token.decimals())
+    let tx = await poolBuilder.createBanklessMultipleWinners(stakePoolConfig, multipleWinnersConfig, await token.decimals(), wallet.address)
     let events = await getEvents(poolBuilder, tx)
     let event = events[0]
     prizePool = await hardhat.ethers.getContractAt('BanklessPrizePoolHarness', event.args.prizePool, wallet)

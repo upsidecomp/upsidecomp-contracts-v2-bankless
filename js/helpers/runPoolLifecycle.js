@@ -17,7 +17,6 @@ async function getPrizePoolAddressFromBuilderTransaction(tx) {
   const createResultReceipt = await ethers.provider.getTransactionReceipt(tx.hash)
   const createResultEvents = createResultReceipt.logs.map(log => { try { return proxyFactory.parseLog(log) } catch (e) { return null } })
   const address = createResultEvents[0].args.proxy
-  dim(`Found pool address at ${address}`)
   return address
 }
 
