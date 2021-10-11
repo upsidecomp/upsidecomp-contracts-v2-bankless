@@ -261,30 +261,6 @@ abstract contract PeriodicPrizeStrategy is Initializable,
     return _currentTime() >= _prizePeriodEndAt();
   }
 
-
-  /// @notice Awards all external ERC721 tokens to the given user.
-  /// The external tokens must be held by the PrizePool contract.
-  /// @dev The list of ERC721s is reset after every award
-  /// @param winners The users to transfer the tokens to
-  function _awardPrizes(address[] memory winners) internal {
-    require(winners.length == numberOfPrizes, "PeriodicPrizeStrategy/invalid-winner-array");
-    address currentToken = prizesErc721.start();
-    uint256 j = 0;
-    while (currentToken != address(0) && currentToken != prizesErc721.end()) {
-      uint256 balance = IERC721Upgradeable(currentToken).balanceOf(address(prizePool));
-      if (balance > 0) {
-        for (uint256 i = 0; i < prizesErc721TokenIds[IERC721Upgradeable(currentToken)].length; i++) {
-              prizePool.awardPrize(winners[j], currentToken, prizesErc721TokenIds[IERC721Upgradeable(currentToken)][i]);
-              j++;
-        }
-      }
-      _removePrizeByAwardTokens(IERC721Upgradeable(currentToken));
-      currentToken = prizesErc721.next(currentToken);
-    }
-    prizesErc721.clearAll();
-    numberOfPrizes = 0;
-  }
-
   /// @notice Returns the timestamp at which the prize period ends
   /// @return The timestamp at which the prize period ends.
   function prizePeriodEndAt() external view returns (uint256) {

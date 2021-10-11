@@ -9,13 +9,6 @@ import "../PeriodicPrizeStrategy.sol";
 
 contract BanklessMultipleWinners is PeriodicPrizeStrategy {
   /**
-    * @notice Emitted when the winner selection retry limit is reached during award distribution.
-    * @dev Emitted when the maximum number of users has not been selected after the blocklistRetryCount is reached.
-    * @param numberOfWinners Total number of winners selected before the blocklistRetryCount is reached.
-  */
-  event RetryMaxLimitReached(uint256 numberOfWinners);
-
-  /**
     * @notice Emitted when no winner can be selected during the prize distribution.
     * @dev Emitted when no winner can be selected in _distribute due to ticket.totalSupply() equaling zero.
   */
@@ -61,17 +54,27 @@ contract BanklessMultipleWinners is PeriodicPrizeStrategy {
       return;
     }
 
-    uint256 numberOfWinners = numberOfPrizes;
-    address[] memory winners = new address[](numberOfWinners);
     uint256 nextRandom = randomNumber;
-    uint256 winnerCount = 0;
+    address currentToken = prizesErc721.start();
+    uint256 nonce = 0;
 
-    while (winnerCount < numberOfWinners) {
-      winners[winnerCount] = ticket.draw(nextRandom);
-      winnerCount++;
-      nextRandom = uint256(keccak256(abi.encodePacked(nextRandom + 499 + winnerCount*521)));
+    while (currentToken != address(0) && currentToken != prizesErc721.end()) {
+      uint256 balance = IERC721Upgradeable(currentToken).balanceOf(address(prizePool));
+      if (balance > 0) {
+        for (uint256 i = 0; i < prizesErc721TokenIds[IERC721Upgradeable(currentToken)].length; ) {
+              address winner = ticket.draw(nextRandom);
+              if (prizePool.awardPrize(winner, currentToken, prizesErc721TokenIds[IERC721Upgradeable(currentToken)][i])) {
+                i++;
+              }
+              nonce += 1;
+              nextRandom = uint256(keccak256(abi.encodePacked(nextRandom + 499 + nonce*521)));
+        }
+      }
+      _removePrizeByAwardTokens(IERC721Upgradeable(currentToken));
+      currentToken = prizesErc721.next(currentToken);
     }
 
-    _awardPrizes(winners);
+    prizesErc721.clearAll();
+    numberOfPrizes = 0;
   }
 }
