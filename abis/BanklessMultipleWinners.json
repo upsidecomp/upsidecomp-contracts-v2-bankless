@@ -240,19 +240,6 @@
   },
   {
     "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "numberOfWinners",
-        "type": "uint256"
-      }
-    ],
-    "name": "RetryMaxLimitReached",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
     "inputs": [],
     "name": "RngRequestFailed",
     "type": "event"

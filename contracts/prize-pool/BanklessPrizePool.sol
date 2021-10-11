@@ -15,11 +15,17 @@ contract BanklessPrizePool is StakePrizePool {
   )
     external
     onlyPrizeStrategy
+    returns (bool)
   {
     require(_canAwardExternal(externalToken), "BanklessPrizePool/invalid-external-token");
 
-    IERC721Upgradeable(externalToken).safeTransferFrom(address(this), to, tokenId);
-
-    emit DistributedAward(to, externalToken, tokenId);
+    try IERC721Upgradeable(externalToken).safeTransferFrom(address(this), to, tokenId) {
+      emit DistributedAward(to, externalToken, tokenId);
+      return true;
+    }
+    catch(bytes memory error){
+      emit ErrorAwardingExternalERC721(error);
+      return false;
+    }
   }
 }
