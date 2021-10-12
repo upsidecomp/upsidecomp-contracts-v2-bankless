@@ -16,7 +16,8 @@
     "deploy:pool": "hardhat run ./js/pool/createBANKPool.js --network",
     "clean": "rm -rf abis artifacts build .build-openzeppelin cache coverage coverage.json test-results.xml .cache-openzeppelin deployments/localhost deployments/localhost_*; mkdir abis",
     "prepack": "yarn clean && yarn compile",
-    "postpublish": "PACKAGE_VERSION=$(./scripts/package-version.sh) && git tag -ae v$PACKAGE_VERSION && git push --tags"
+    "postpublish": "PACKAGE_VERSION=$(./scripts/package-version.sh) && git tag -ae v$PACKAGE_VERSION && git push --tags",
+    "format": "prettier --write 'contracts/**/*.sol'"
   },
   "dependencies": {
     "@openzeppelin/contracts-upgradeable": "3.4.0",
@@ -48,6 +49,8 @@
     "hardhat-deploy-ethers": "^0.3.0-beta.10",
     "minimist": "^1.2.5",
     "mocha-junit-reporter": "1.23.3",
+    "prettier": "^2.4.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.18",
     "shelljs": "0.8.3",
     "solc": "0.6.4",
     "solhint": "3.0.0",
