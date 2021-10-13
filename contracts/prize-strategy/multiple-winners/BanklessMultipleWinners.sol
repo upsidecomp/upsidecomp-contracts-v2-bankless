@@ -55,23 +55,21 @@ contract BanklessMultipleWinners is PeriodicPrizeStrategy {
         }
 
         uint256 nextRandom = randomNumber;
+
         address currentToken = prizesErc721.start();
         uint256 nonce = 0;
-
         while (currentToken != address(0) && currentToken != prizesErc721.end()) {
             uint256 balance = IERC721Upgradeable(currentToken).balanceOf(address(prizePool));
             if (balance > 0) {
                 for (uint256 i = 0; i < prizesErc721TokenIds[IERC721Upgradeable(currentToken)].length; ) {
                     address winner = ticket.draw(nextRandom);
-                    if (
-                        prizePool.awardPrize(
-                            winner,
-                            currentToken,
-                            prizesErc721TokenIds[IERC721Upgradeable(currentToken)][i]
-                        )
-                    ) {
+                    uint256 tokenId = prizesErc721TokenIds[IERC721Upgradeable(currentToken)][i];
+
+                    // optimize: test both winner address is valid and tokenId in one operation
+                    try prizePool.awardPrize(winner, currentToken, tokenId) {
                         i++;
-                    }
+                    } catch (bytes memory error) {}
+
                     nonce += 1;
                     nextRandom = uint256(keccak256(abi.encodePacked(nextRandom + 499 + nonce * 521)));
                 }

@@ -12,7 +12,7 @@
       }
     },
     {
-      "files": "*.js",
+      "files": "*.ts",
       "options": {
         "bracketSpacing": true,
         "explicitTypes": "always",
