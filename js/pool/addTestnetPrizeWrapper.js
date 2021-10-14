@@ -6,9 +6,9 @@ const {
 } = require("../helpers/runPoolLifecycle");
 
 const debug = require("debug")("ptv3:deployTestnetPool");
-const {mintBank} = require("../helpers/mintBank");
-const {addTestnetPrizes} = require("../helpers/addTestnetPrizes");
-const {getEvents} = require("../../test/helpers/getEvents");
+const { mintBank } = require("../helpers/mintBank");
+const { addTestnetPrizes } = require("../helpers/addTestnetPrizes");
+const { getEvents } = require("../../test/helpers/getEvents");
 
 function dim() {
   console.log(chalk.dim.call(chalk, ...arguments));
@@ -19,7 +19,7 @@ function green() {
 }
 
 async function main() {
-  const {getNamedAccounts, deployments, getChainId, ethers} = hardhat;
+  const { getNamedAccounts, deployments, getChainId, ethers } = hardhat;
   const toWei = ethers.utils.parseEther;
   let {
     deployer,
@@ -34,7 +34,7 @@ async function main() {
   debug(`Using admin address: ${admin}\n`);
 
   const config = {
-    numberOfPrizes: 10,
+    numberOfPrizes: 6,
     prizePoolAddress: "0x29c4B18a595E5e78C7Bcd2aDcCE881F677FF2Ab7",
     prizeStrategyAddress: "0x4C0216192e671e2E767236045067E48762Ec6c96"
   };
@@ -55,9 +55,7 @@ async function main() {
   // add prizes
   let tx2 = await prizeStrategy.addPrizes(res.erc721Address, res.tokenIds);
   await ethers.provider.waitForTransaction(tx2.hash);
-
   let prizes = await prizeStrategy.currentPrizeAddresses();
-  console.log(prizes);
   let tokenIds = await prizeStrategy.currentPrizeTokenIds(prizes[0]);
 
   debug("Prizes: ", {

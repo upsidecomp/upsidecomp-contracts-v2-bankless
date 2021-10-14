@@ -11,11 +11,11 @@ function green() {
 }
 
 async function main() {
-  const {getNamedAccounts, deployments, ethers} = hardhat;
-  const {deploy} = deployments;
+  const { getNamedAccounts, deployments, ethers } = hardhat;
+  const { deploy } = deployments;
   const toWei = ethers.utils.parseEther;
 
-  const {deployer, admin} = await getNamedAccounts();
+  const { deployer, admin } = await getNamedAccounts();
   const signer = await ethers.provider.getSigner(admin);
 
   const prizeStrategy = await hardhat.ethers.getContractAt(
@@ -31,6 +31,7 @@ async function main() {
   console.log("tx1", tx.hash);
   debug("tx1", tx.hash);
   await ethers.provider.waitForTransaction(tx.hash);
+  await ethers.provider.getTransactionReceipt(tx.hash);
 
   debug("Complete Award Winner");
   let tx2 = await prizeStrategy.completeAward();
@@ -38,32 +39,32 @@ async function main() {
   debug("tx2", tx2.hash);
   await ethers.provider.waitForTransaction(tx2.hash);
 
-  debug("Done!");
-  // const BanklessMultipleWinners = await hardhat.artifacts.readArtifact(
-  //   "BanklessMultipleWinners"
-  // );
-  // const bmw = new ethers.utils.Interface(BanklessMultipleWinners.abi);
-  // const createResultReceipt = await ethers.provider.getTransactionReceipt(
-  //   tx2.hash
-  // );
-  // console.log("all", createResultReceipt);
-  // console.log(
-  //   "logs",
-  //   createResultReceipt.logs.forEach(log => {
-  //     l = bmw.parseLog(log);
-  //     if (l.name == "")
-  //   })
-  // );
-  // const tokenIds = createResultReceipt.logs
+  const BanklessMultipleWinners = await hardhat.artifacts.readArtifact(
+    "BanklessMultipleWinners"
+  );
+  const banklessMultipleWinners = new ethers.utils.Interface(
+    BanklessMultipleWinners.abi
+  );
+  const createResultReceipt = await ethers.provider.getTransactionReceipt(
+    tx2.hash
+  );
+
+  // todo: fix
+  // const winnersWithTokenIds = createResultReceipt.logs
   //   .map(log => {
   //     try {
-  //       l = erc721.parseLog(log);
-  //       if (l.name == "Minted") return l.args.tokenId.toNumber();
+  //       l = banklessMultipleWinners.parseLog(log);
+  //       if (l.name == "DistributedAward")
+  //         return [l.args.to, l.args.tokenId.toNumber()];
   //     } catch (e) {
+  //       console.log(e);
   //       return nulls;
   //     }
   //   })
   //   .filter(x => x !== undefined);
+  // console.log(winnersWithTokenIds);
+
+  debug("Done!");
 }
 
 main()

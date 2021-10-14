@@ -45,4 +45,8 @@ contract ERC721Mintable is ERC721Upgradeable {
 
         return true;
     }
+
+    function setBaseURI(string calldata newBaseTokenURI) public {
+      _setBaseURI(newBaseTokenURI);
+    }
 }
