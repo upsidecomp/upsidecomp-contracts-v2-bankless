@@ -89,7 +89,7 @@ abstract contract PeriodicPrizeStrategy is Initializable, OwnableUpgradeable, To
     }
 
     /// @notice Semver Version
-    string public constant VERSION = "3.4.1";
+    string public constant VERSION = "1.0.2";
 
     // Comptroller
     TokenListenerInterface public tokenListener;

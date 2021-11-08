@@ -1,14 +1,8 @@
 const hardhat = require("hardhat");
 const chalk = require("chalk");
 
-const {
-  getPrizePoolAddressFromBuilderTransaction
-} = require("../helpers/runPoolLifecycle");
-
-const debug = require("debug")("ptv3:deployTestnetPool");
-const { mintBank } = require("../helpers/mintBank");
+const debug = require("debug")("ptv3:addTestnetPrizeWrapper");
 const { addTestnetPrizes } = require("../helpers/addTestnetPrizes");
-const { getEvents } = require("../../test/helpers/getEvents");
 
 function dim() {
   console.log(chalk.dim.call(chalk, ...arguments));
@@ -19,14 +13,10 @@ function green() {
 }
 
 async function main() {
-  const { getNamedAccounts, deployments, getChainId, ethers } = hardhat;
-  const toWei = ethers.utils.parseEther;
+  const { getNamedAccounts, ethers } = hardhat;
   let {
     deployer,
-    rng,
     admin,
-    sablier,
-    reserveRegistry
   } = await getNamedAccounts();
 
   const signer = await ethers.provider.getSigner(admin);
@@ -34,7 +24,7 @@ async function main() {
   debug(`Using admin address: ${admin}\n`);
 
   const config = {
-    numberOfPrizes: 6,
+    numberOfPrizes: 1,
     prizePoolAddress: "0x29c4B18a595E5e78C7Bcd2aDcCE881F677FF2Ab7",
     prizeStrategyAddress: "0x4C0216192e671e2E767236045067E48762Ec6c96"
   };
