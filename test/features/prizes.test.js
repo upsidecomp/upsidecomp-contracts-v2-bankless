@@ -374,35 +374,152 @@ describe("External Awards", () => {
     });
   });
 
-  it("should pass if winner is contract address", async () => {
+    it("should fail if winner is an NOT an ERC721Receiver contract", async () => {
+      const tokenIds = [1];
+
+      await env.createPool({
+        prizePeriodSeconds: 100,
+        creditLimit: "0",
+        creditRate: "0"
+      });
+
+      await env.addPrize({
+        user: 0,
+        tokenIds: tokenIds,
+        name: "TEST",
+        symbol: "TEST"
+      });
+
+      await env.currentPrizeTokenIdsOfIndex({
+        user: 0,
+        index: 0,
+        tokenIds: tokenIds
+      });
+      
+      const contractAddress = await env.buyTicketsForContract({ type: "ERC721NotReceiver" });
+      await env.awardPrize();
+      await env.expectAddressToNotHaveExternalAwardToken({
+        address: contractAddress,
+        index: 0,
+        tokenIds: tokenIds
+      });
+      await env.expectEmptyPrizeList();
+  });
+
+  it("should pass if winner is an ERC721Receiver contract", async () => {
     const tokenIds = [1];
 
     await env.createPool({
-      prizePeriodSeconds: 10,
-      creditLimit: "0.1",
-      creditRate: "0.01"
+      prizePeriodSeconds: 100,
+      creditLimit: "0",
+      creditRate: "0"
     });
+
     await env.addPrize({
       user: 0,
       tokenIds: tokenIds,
       name: "TEST",
       symbol: "TEST"
     });
+
     await env.currentPrizeTokenIdsOfIndex({
       user: 0,
       index: 0,
       tokenIds: tokenIds
     });
-    await env.buyTicketsContractAddress({type: "NonERC721Receiver"});
-    await env.buyTickets({user: 1, tickets: 100});
+    
+    const contractAddress = await env.buyTicketsForContract({ type: "ERC721Receiver" });
     await env.awardPrize();
-    await env.expectUserToHaveExternalAwardToken({
-      user: 1,
+    await env.expectAddressToHaveExternalAwardToken({
+      address: contractAddress,
       index: 0,
       tokenIds: tokenIds
     });
     await env.expectEmptyPrizeList();
   });
+
+    it("should be able to giveaway prizes even if some winners are NOT an ERC721Receiver", async () => {
+    const tokenIds = [0, 1];
+
+    await env.createPool({
+      prizePeriodSeconds: 100,
+      creditLimit: "0",
+      creditRate: "0"
+    });
+
+    await env.addPrize({
+      user: 0,
+      tokenIds: tokenIds,
+      name: "TEST",
+      symbol: "TEST"
+    });
+
+    await env.currentPrizeTokenIdsOfIndex({
+      user: 0,
+      index: 0,
+      tokenIds: tokenIds
+    });
+    
+    await env.buyTickets({user: 1, tickets: 100});
+    const contractAddress = await env.buyTicketsForContract({ type: "ERC721Receiver" });
+    await env.awardPrizeToToken({token: 1});
+    await env.expectUserToHaveExternalAwardToken({
+        user: 1,
+        index: 0,
+        tokenIds: [0]
+    });
+
+    await env.expectAddressToHaveExternalAwardToken({
+      address: contractAddress,
+      index: 0,
+      tokenIds: [1]
+    });
+    await env.expectEmptyPrizeList();
+  });
+
+
+    it("should be able to giveaway prizes even if some winners are NOT an ERC721Receiver", async () => {
+        const tokenIds = [0, 1];
+
+        await env.createPool({
+          prizePeriodSeconds: 100,
+          creditLimit: "0",
+          creditRate: "0"
+        });
+
+        await env.addPrize({
+          user: 0,
+          tokenIds: tokenIds,
+          name: "TEST",
+          symbol: "TEST"
+        });
+
+        await env.currentPrizeTokenIdsOfIndex({
+          user: 0,
+          index: 0,
+          tokenIds: tokenIds
+        });
+        
+        await env.buyTickets({user: 1, tickets: 100});
+        const contractAddress = await env.buyTicketsForContract({ type: "ERC721NotReceiver" });
+        await env.awardPrizeToToken({token: 1});
+        await env.expectUserToHaveExternalAwardToken({
+            user: 1,
+            index: 0,
+            tokenIds: [0]
+        });
+        await env.expectAddressToNotHaveExternalAwardToken({
+          address: contractAddress,
+          index: 0,
+          tokenIds: tokenIds
+        });
+        await env.expectAddressToHaveExternalAwardToken({
+          address: await env.prizePoolAddress(),
+          index: 0,
+          tokenIds: [1]
+        });
+        await env.expectEmptyPrizeList();
+      });
 
   it("should run more than 1 competition", async () => {
     const collectionATokenIds = [1, 2];

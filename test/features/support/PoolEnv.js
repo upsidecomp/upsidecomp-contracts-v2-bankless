@@ -98,6 +98,12 @@ function PoolEnv() {
     return prizePool;
   };
 
+  this.prizePoolAddress = async function() {
+    let wallet = await this.wallet(0);
+    let prizePool = this.env.prizePool.connect(wallet)
+    return prizePool.address
+  }
+
   this.token = async function(wallet) {
     return this.env.token.connect(wallet);
   };
@@ -144,19 +150,21 @@ function PoolEnv() {
   //   await this.externalERC20Awards[externalAward].mint(this.env.prizePool.address, toWei(amount))
   // }
 
-  this.buyTickets = async function({user, tickets, referrer}) {
+  this.buyTickets = async function({user, tickets, referrer, toAddress = AddressZero }) {
     debug(`Buying tickets...`);
     let wallet = await this.wallet(user);
 
-    debug("wallet is ", wallet.address);
+    debug("Wallet is ", wallet.address);
 
     let token = await this.token(wallet);
     let ticket = await this.ticket(wallet);
     let prizePool = await this.prizePool(wallet);
 
     let amount = toWei(tickets);
+    debug("amount", amount)
 
     let balance = await token.balanceOf(wallet.address);
+    debug("balance", balance)
     if (balance.lt(amount)) {
       let minter = await this.wallet(0);
       let minterToken = await this.token(minter);
@@ -171,12 +179,17 @@ function PoolEnv() {
       referrerAddress = (await this.wallet(referrer)).address;
     }
 
+    const depositToAddress = 
+      toAddress == AddressZero ? wallet.address : toAddress
+
     debug(
-      `Depositing... (${wallet.address}, ${amount}, ${ticket.address}, ${referrerAddress})`
+      `Depositing... (${depositToAddress}, ${amount}, ${ticket.address}, ${referrerAddress})`
     );
 
+    console.log()
+
     await prizePool.depositTo(
-      wallet.address,
+      depositToAddress,
       amount,
       ticket.address,
       referrerAddress,
@@ -184,26 +197,6 @@ function PoolEnv() {
     );
 
     debug(`Bought tickets`);
-  };
-
-  this.buyTicketsContractAddress = async function({type}) {
-    const user = 1;
-
-    if (type == "NonERC721Receiver") {
-      let wallet = await this.wallet(user);
-      const ERC721CantReceive = await hre.ethers.getContractFactory(
-        "ERC721CantReceive",
-        wallet
-      );
-      const erc721 = await ERC721CantReceive.deploy();
-
-      this.buyTickets({user: user, tickets: 100});
-      this.transferTicketsToAddress({user: user, tickets: 100});
-    }
-  };
-
-  this.transferTicketsToAddress = async function({user, tokens, address}) {
-    let walet = await this.walelt;
   };
 
   this.transferCompoundTokensToPrizePool = async function({user, tokens}) {
@@ -414,6 +407,30 @@ function PoolEnv() {
     }
   };
 
+  this.expectAddressToNotHaveExternalAwardToken = async function({
+    address,
+    index,
+    tokenIds
+  }) {
+    for (var i = 0; i < tokenIds.length; i++) {
+      expect(
+        await this.externalERC721Awards[index].ownerOf(tokenIds[i])
+      ).to.not.equal(address);
+    }
+  };
+
+  this.expectAddressToHaveExternalAwardToken = async function({
+    address,
+    index,
+    tokenIds
+  }) {
+    for (var i = 0; i < tokenIds.length; i++) {
+      expect(
+        await this.externalERC721Awards[index].ownerOf(tokenIds[i])
+      ).to.equal(address);
+    }
+  };
+
   this.expectEmptyPrizeList = async function() {
     expect(
       await this.env.prizeStrategy.currentPrizeAddresses(this.overrides)
@@ -437,6 +454,34 @@ function PoolEnv() {
       name: "TEST",
       symbol: "TEST"
     });
+  };
+
+    this.buyTicketsForContract = async function({type}) {
+    const user = 1;
+    let wallet = await this.wallet(user);
+
+    let contract;
+    switch (type) {
+      case "ERC721NotReceiver": {
+        const ERC721NotReceiver = await hre.ethers.getContractFactory(
+          "ERC721NotReceiver",
+          wallet
+        );
+        contract = await ERC721NotReceiver.deploy();
+        break;
+      }
+      case "ERC721Receiver": {
+        const ERC721Receiver = await hre.ethers.getContractFactory(
+          "ERC721Receiver",
+          wallet
+        );
+        contract = await ERC721Receiver.deploy();
+        break;
+      }
+    }
+      
+      await this.buyTickets({user: user, tickets: 100, toAddress: contract.address });
+      return contract.address
   };
 }
 
