@@ -128,6 +128,7 @@ contract BanklessMultipleWinners is PeriodicPrizeStrategy {
             if (!isBlocklisted[winner]) {
                 winners[winnerCount++] = winner;
             } else if (++retries >= _retryCount) {
+                    // emit address of guy fucking it up!
                     emit RetryMaxLimitReached(winnerCount);
                 if (winnerCount == 0) {
                     // optimize: returns if no winner; however, enforcing a larger blocklistRetryCount 
@@ -144,15 +145,22 @@ contract BanklessMultipleWinners is PeriodicPrizeStrategy {
         }
 
         address currentToken = prizesErc721.start();
-        uint256 winnerAwardIndex = 0;
+        uint256 winnerIndex = 0;
         while (currentToken != address(0) && currentToken != prizesErc721.end()) {
             uint256 balance = IERC721Upgradeable(currentToken).balanceOf(address(prizePool));
             if (balance > 0) {
                 for (uint256 i = 0; i < prizesErc721TokenIds[IERC721Upgradeable(currentToken)].length; i++) {
-                    // optimize: awardPrize pool wrapped in try/catch to test if
-                    // both winner address is valid and tokenId in one operation
-                    prizePool.awardPrize(winners[winnerAwardIndex], currentToken, prizesErc721TokenIds[IERC721Upgradeable(currentToken)][i]);
-                    winnerAwardIndex++;
+                    address winner = winners[winnerIndex];
+                    if (winner != address(0)) {
+                        // optimize: awardPrize pool wrapped in try/catch to test if
+                        // both winner address is valid and tokenId in one operation
+                        prizePool.awardPrize(winner, currentToken, prizesErc721TokenIds[IERC721Upgradeable(currentToken)][i]);
+                        winnerIndex++;
+                    } else {
+                        // optimize: address(0) is only found when the retryMaxLimitReached
+                        // event is emitted
+                        break;
+                    }
                 }
             }
             _removePrizeByAwardTokens(IERC721Upgradeable(currentToken));
